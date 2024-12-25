@@ -1,0 +1,258 @@
+{
+  "ticketClasses": [
+    {
+      "value": "ECONOMY",
+      "label": "Economy"
+    },
+    {
+      "value": "BUSINESS",
+      "label": "Business"
+    },
+    {
+      "value": "FIRST",
+      "label": "First Class"
+    },
+    {
+      "value": "PREMIUM_ECONOMY",
+      "label": "Premium Economy"
+    }
+  ],
+  "airports": [
+    {
+      "value": "TYO",
+      "label": "Tokyo - JPN",
+      "city": {
+        "address": {
+          "cityCode": "TYO",
+          "cityName": "Tokyo",
+          "countryName": "Japan"
+        },
+        "name": "Tokyo International Airport"
+      }
+    },
+    {
+      "value": "SOE",
+      "label": "Soeta - INA",
+      "city": {
+        "address": {
+          "cityCode": "SOE",
+          "cityName": "Soeta",
+          "countryName": "Indonesia"
+        },
+        "name": "Soekarno-Hatta International Airport"
+      }
+    },
+    {
+      "value": "LOS",
+      "label": "Lagos - LOS",
+      "city": {
+        "address": {
+          "cityCode": "LOS",
+          "cityName": "Lagos",
+          "countryName": "Nigeria"
+        },
+        "name": "Murtala Muhammed International Airport"
+      }
+    },
+    {
+      "value": "JFK",
+      "label": "New York - USA",
+      "city": {
+        "address": {
+          "cityCode": "NYC",
+          "cityName": "New York",
+          "countryName": "United States"
+        },
+        "name": "John F. Kennedy International Airport"
+      }
+    },
+    {
+      "value": "LHR",
+      "label": "London - GBR",
+      "city": {
+        "address": {
+          "cityCode": "LON",
+          "cityName": "London",
+          "countryName": "United Kingdom"
+        },
+        "name": "London Heathrow Airport"
+      }
+    },
+    {
+      "value": "SYD",
+      "label": "Sydney - AUS",
+      "city": {
+        "address": {
+          "cityCode": "SYD",
+          "cityName": "Sydney",
+          "countryName": "Australia"
+        },
+        "name": "Sydney Kingsford Smith Airport"
+      }
+    },
+    {
+      "value": "CPT",
+      "label": "Cape Town - ZAF",
+      "city": {
+        "address": {
+          "cityCode": "CPT",
+          "cityName": "Cape Town",
+          "countryName": "South Africa"
+        },
+        "name": "Cape Town International Airport"
+      }
+    },
+    {
+      "value": "GRU",
+      "label": "São Paulo - BRA",
+      "city": {
+        "address": {
+          "cityCode": "SAO",
+          "cityName": "São Paulo",
+          "countryName": "Brazil"
+        },
+        "name": "São Paulo/Guarulhos–Governador André Franco Montoro International Airport"
+      }
+    },
+    {
+      "value": "NRT",
+      "label": "Narita - JPN",
+      "city": {
+        "address": {
+          "cityCode": "NRT",
+          "cityName": "Narita",
+          "countryName": "Japan"
+        },
+        "name": "Narita International Airport"
+      }
+    }
+  ],
+  "userType": [
+    {
+      "value": "admin",
+      "label": "Admin"
+    },
+    {
+      "value": "organization",
+      "label": "Organization"
+    },
+    {
+      "value": "staff",
+      "label": "Staff"
+    }
+  ],
+  "paymentType": [
+    {
+      "value": "prepaid ",
+      "label": "Prepaid "
+    },
+    {
+      "value": "postpaid",
+      "label": "Postpaid"
+    }
+  ],
+  "transactionData": [
+    {
+      "transactionId": "TXN001",
+      "type": "Account Top-Up",
+      "amount": 5000,
+      "status": "Success",
+      "date": "2024-08-20T10:30:00Z",
+      "details": {
+        "method": "Credit Card",
+        "referenceNumber": "REF123456789"
+      }
+    },
+    {
+      "transactionId": "TXN002",
+      "type": "Transfer",
+      "amount": 2000,
+      "status": "Success",
+      "date": "2024-08-21T14:15:00Z",
+      "details": {
+        "recipient": "John Doe",
+        "recipientAccount": "0123456789",
+        "referenceNumber": "REF987654321"
+      }
+    },
+    {
+      "transactionId": "TXN003",
+      "type": "Withdraw",
+      "amount": 1000,
+      "status": "Pending",
+      "date": "2024-08-22T09:00:00Z",
+      "details": {
+        "bank": "ABC Bank",
+        "accountNumber": "1122334455",
+        "referenceNumber": "REF555555555"
+      }
+    },
+    {
+      "transactionId": "TXN004",
+      "type": "Flight Booked",
+      "amount": 15000,
+      "status": "Success",
+      "date": "2024-08-23T16:45:00Z",
+      "details": {
+        "flightNumber": "FL123",
+        "departure": "2024-09-01T08:00:00Z",
+        "arrival": "2024-09-01T12:00:00Z",
+        "origin": "LAX",
+        "destination": "JFK",
+        "passengerName": "Jane Smith",
+        "referenceNumber": "FLIGHT123456789"
+      }
+    },
+    {
+      "transactionId": "TXN005",
+      "type": "Flight Booked",
+      "amount": 20000,
+      "status": "Failed",
+      "date": "2024-08-24T12:30:00Z",
+      "details": {
+        "flightNumber": "FL456",
+        "departure": "2024-09-05T10:00:00Z",
+        "arrival": "2024-09-05T14:00:00Z",
+        "origin": "SFO",
+        "destination": "ORD",
+        "passengerName": "Michael Johnson",
+        "referenceNumber": "FLIGHT987654321"
+      }
+    },
+    {
+      "transactionId": "TXN006",
+      "type": "Withdraw",
+      "amount": 3000,
+      "status": "Success",
+      "date": "2024-08-25T11:20:00Z",
+      "details": {
+        "bank": "XYZ Bank",
+        "accountNumber": "9988776655",
+        "referenceNumber": "REF333333333"
+      }
+    },
+    {
+      "transactionId": "TXN007",
+      "type": "Account Top-Up",
+      "amount": 2500,
+      "status": "Failed",
+      "date": "2024-08-26T08:50:00Z",
+      "details": {
+        "method": "Debit Card",
+        "referenceNumber": "REF444444444"
+      }
+    },
+    {
+      "transactionId": "TXN008",
+      "type": "Transfer",
+      "amount": 4000,
+      "status": "Success",
+      "date": "2024-08-27T15:40:00Z",
+      "details": {
+        "recipient": "Emily Davis",
+        "recipientAccount": "5678901234",
+        "referenceNumber": "REF666666666"
+      }
+    }
+  ]
+}

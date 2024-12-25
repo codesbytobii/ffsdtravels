@@ -12,7 +12,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ pageName }) => {
       </p>
 
       <div>
-        Search bar
+        Search Bar
       </div>
     </div>
   );

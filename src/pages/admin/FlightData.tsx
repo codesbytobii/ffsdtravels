@@ -560,7 +560,7 @@ const FlightData: React.FC = () => {
 
         const flightsData = responses?.data?.data;
 
-        // console.log('flightsData',flightsData);
+        console.log('flightsData',flightsData);
 
         const formattedFlights = flightsData.map((flight: FlightDetails) => ({
           reference: flight.reference,

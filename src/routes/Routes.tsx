@@ -227,7 +227,7 @@ const routes = {
   BookFlightPage: {
     link: "/book-flight",
     element: <BookFlightPage />,
-    pageName: "book flight",
+    pageName: "Book Flight",
   },
   PssLandingPage: {
     link:"/advert",

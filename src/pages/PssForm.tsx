@@ -243,6 +243,8 @@ const PssForm: React.FC = () => {
         body: JSON.stringify(formData),
       });
 
+      console.log('response', response)
+
       if (response.ok) {
         alert("Form submitted successfully!");
         setFullName("");
@@ -382,8 +384,8 @@ const PssForm: React.FC = () => {
       {/* CAPTCHA */}
       <div className="mb-5">
         <ReCAPTCHA
-          // sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
-          sitekey="6Lf2zo0qAAAAAHsX7zXFTU0bLECjZ9SNmWRwixUG"
+          sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+          // sitekey="6Lf2zo0qAAAAAHsX7zXFTU0bLECjZ9SNmWRwixUG"
           onChange={handleCaptchaChange}
         />
       </div>

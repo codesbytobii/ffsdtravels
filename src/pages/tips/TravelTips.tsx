@@ -9,7 +9,7 @@ import kasolIcon from "../../assets/img/kasol.jpg";
 import ladaskIcon from "../../assets/img/ladakh.jpg";
 import mahabaleshwarIcon from "../../assets/img/mahabaleshwar.jpg";
 import nainitalIcon from "../../assets/img/nainital.jpg";
-import rishikeshIcon from "../../assets/img/rishikesh.jpg";
+// import rishikeshIcon from "../../assets/img/rishikesh.jpg";
 import lonavalaIcon from "../../assets/img/lonavala.jpg";
 // import { CalendarIcon } from "lucide-react";
 
@@ -43,13 +43,13 @@ export default function TravelTips() {
       Description:
         "Navigate airport security with ease by understanding TSA rules, avoiding delays, and speeding up your screening process.",
     },
-    {
-      img: rishikeshIcon,
-      location: "What to Do If Your Flight is Delayed or Canceled",
-      date: "18-06-2024",
-      Description:
-        "Prepare for flight delays or cancellations with our guide on your rights, compensation, and next steps for disrupted travel.",
-    },
+    // {
+    //   img: rishikeshIcon,
+    //   location: "What to Do If Your Flight is Delayed or Canceled",
+    //   date: "18-06-2024",
+    //   Description:
+    //     "Prepare for flight delays or cancellations with our guide on your rights, compensation, and next steps for disrupted travel.",
+    // },
     {
       img: lonavalaIcon,
       location: "Essential Travel Apps for a Smooth Trip",

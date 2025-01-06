@@ -278,6 +278,10 @@ const OneWayTab = () => {
   
       const data = await response.json();
 
+      localStorage.setItem("confirmPriceToken", data.accessToken);
+
+      console.log('the data is', data.accessToken)
+
       console.log("data isdjsd", data.data);
 
       // const flightData: FlightData[] = data.map((offer: any) => mapFlightData(offer));
@@ -306,6 +310,7 @@ const OneWayTab = () => {
       setFlightSearchLoading(false); // End loading
     }
   };
+
   
   
   // Call the function

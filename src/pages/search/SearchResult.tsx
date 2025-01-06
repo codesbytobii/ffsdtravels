@@ -124,126 +124,85 @@ const getNumberOfStops = (numSegments: number) =>
     ? "non-stop"
     : `${numSegments - 1} ${numSegments - 1 === 1 ? "stop" : "stops"}`;
 
-// const formatDate = (dateString: string) =>
-//   new Date(dateString + "T00:00:00").toLocaleDateString("en-GB", {
-//     day: "2-digit",
-//     month: "long",
-//     year: "numeric",
-//   });
 
 const ITEMS_PER_PAGE = 10;
 
 // FlightCard Component
 const FlightCard: React.FC<{ result: Flight }> = ({ result }) => {
   const navigate = useNavigate(); // Use the useNavigate hook from react-router-dom
-
-  // console.log("this is the result", result)
-
-  // Function to handle the book flight action
-  // const handleBookFlight = async () => {
-  //   const selectedFlight = {
-  //     // flightId: result.id,
-  //     // totalPrice: result.price.ffsd_total,
-  //     // currency: result.price.currency,
-  //     flightOffers: result, // Include the full flight offer
-  //     type: 'flight-offers-pricing', // Example: Add the flight type (if available in `result`)
-  //     // token: result.accessToken,
-  //   };
-
-  //   console.log('selectedFlight', selectedFlight)
   
-  //   try {
-  //     // Show a loading state if needed
-  //     console.log("Confirming price...");
-
-  //     const token = localStorage.getItem("apiToken");
-  //     if (!token) throw new Error("Authentication token is missing.");
   
-  //     // Make the API call to confirm the price
-  //     const response = await fetch("https://test.ffsdtravels.com/api/flight/price/confirm", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Authorization: `Bearer ${token}`
-  //       },
-  //       body: JSON.stringify(selectedFlight),
-  //     });
+  // const handleBookFlight = () => {
+  //   // Optionally, store flight details in localStorage
+  //   localStorage.setItem("selectedFlight", JSON.stringify(result));
 
-  
-  //     const data = await response.json();
-
-  //     console.log('data response', data)
-
-  
-  //     if (!response.ok || !data.success) {
-  //       throw new Error(data.message || "Failed to confirm the price.");
-  //     }
-  
-  //     // If the price is confirmed, store the flight details and navigate
-  //     localStorage.setItem("selectedFlight", JSON.stringify(result));
-  //     navigate("/book-flight");
-  //   } catch (error) {
-  //     // Handle error (e.g., show an error message)
-  //     console.error("Price confirmation failed:", error);
-  //     alert(error.message || "Could not confirm the flight price. Please try again.");
-  //   }
+  //   // Navigate to the booking page (adjust the route as needed)
+  //   navigate("/book-flight");
   // };
 
-  // const handleBookFlight = async () => {
-  //   const selectedFlight = {
-  //     flightOffers: Array.isArray(result) ? result : [result], // Ensure it's an array, // Ensure this contains the correct data
-  //     type: 'flight-offers-pricing', // Adjust based on API requirements
-  //   };
-  
-  //   console.log('Payload being sent:', selectedFlight);
-  
-  //   try {
-  //     const token = localStorage.getItem("apiToken");
-  //     if (!token) throw new Error("Authentication token is missing.");
-  
-  //     const response = await fetch("https://test.ffsdtravels.com/api/flight/price/confirm", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Authorization: `Bearer ${token}`
-  //       },
-  //       body: JSON.stringify(selectedFlight),
-  //     });
-  
-  //     const data = await response.json();
-  //     console.log("API Response:", data);
-  
-  //     if (!response.ok || !data.success) {
-  //       throw new Error(data.message || "Failed to confirm the price.");
-  //     }
-  
-  //     localStorage.setItem("selectedFlight", JSON.stringify(result));
-  //     navigate("/book-flight");
-  //   } catch (error) {
-  //     console.error("Price confirmation failed:", error);
-  //     alert(error.message || "Could not confirm the flight price. Please try again.");
-  //   }
-  // };
-  
-  
-  const handleBookFlight = () => {
-    // Optionally, store flight details in localStorage
-    localStorage.setItem("selectedFlight", JSON.stringify(result));
+  const handleBookFlight = async () => {
+    try {
+      // Build the payload structure
+      const payload = {
+        data: {
+          type: "flight-offers-pricing",
+          flightOffers: [result], // Use the selected flight data here
+        },
+      };
 
-    // Navigate to the booking page (adjust the route as needed)
-    navigate("/book-flight");
+      const confirmPriceToken = localStorage.getItem("confirmPriceToken");
+      console.log('confirmPriceToken testing', confirmPriceToken)
+
+      console.log('confirmPriceToken', confirmPriceToken)
+  
+      // Call the API to confirm the price
+      const response = await fetch(
+        "https://test.ffsdtravels.com/api/flight/price/confirm",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${confirmPriceToken}`, // Include token if required
+            // Authorization: `Bearer ${localStorage.getItem("accesstoken")}`, // Include token if required
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      console.log("Response:", response);
+      console.log("Response Status:", response.status);
+      console.log("Response Headers:", response.headers);
+  
+      const data = await response.json();
+      console.log('pricedata', data);
+
+      localStorage.setItem("payToken", data.accessToken)
+  
+      if (response.ok) {
+        // If price confirmation is successful
+        console.log("Price confirmed:", data);
+  
+        // Optionally, store flight details in localStorage
+        localStorage.setItem("selectedFlight", JSON.stringify(result));
+  
+        // Navigate to the booking page
+        navigate("/book-flight");
+      } else {
+        // Handle errors (e.g., price mismatch or other API errors)
+        alert(`Price confirmation failed: ${data.message || "Unknown error"}`);
+      }
+    } catch (error) {
+      console.error("Error confirming price:", error);
+      alert("An error occurred while confirming the price. Please try again.");
+    }
   };
+  
 
   if (!result.itineraries.length) return null;
-  // if (!result || !result.itineraries.length) {
-  //   return <p>No flights available at the moment.</p>; // Fallback UI
-  // }
 
   return (
     <div className="flex flex-col gap-4">
       {result.itineraries.map((itinerary, index) => {
-        // console.log("itinerary:", itinerary.segments);  // Log each itinerary
-        // console.log("result:", result);  // Log the result object
 
         return (
         <Card key={index} className="bg-white shadow-md p-4 rounded-sm">

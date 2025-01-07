@@ -110,10 +110,14 @@ const BookFlightPage: React.FC = () => {
 
   useEffect(() => {
     const storedFlightData = localStorage.getItem("selectedFlight");
+
+    console.log('storedflightdata', storedFlightData)
   
     if (storedFlightData) {
       const parsedFlightDetails = JSON.parse(storedFlightData);
       setFlightDetails(parsedFlightDetails);
+
+      console.log('parsedFlightDetails', parsedFlightDetails)
   
       // Set other state variables based on parsedFlightDetails...
     }
@@ -139,7 +143,7 @@ const BookFlightPage: React.FC = () => {
         },
       });
 
-      // console.log('initiate response', response)
+      console.log('initiate response', response)
   
       if (!response.ok) {
         throw new Error("Failed to initiate payment with the API");
@@ -314,16 +318,6 @@ const BookFlightPage: React.FC = () => {
     }
   };
 
-  // Handle form submission and store passenger data in localStorage
-  // const handleSubmit = (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   setIsLoading(true);
-  //   localStorage.setItem("passengerInfo", JSON.stringify(passengerForms));
-  //   // console.log("Passenger Data:", passengerForms);
-
-  //   // Initiate the payment
-  //   initiatePayment();
-  // };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -335,41 +329,6 @@ const BookFlightPage: React.FC = () => {
     // Initiate the payment
     initiatePayment();
   
-    // Reset the form to its initial structure
-    // const totalTravelers = flightDetails.travelerPricings.length;
-    // setPassengerForms(
-    //   Array.from({ length: totalTravelers }, (_, index) => ({
-    //     id: (index + 1).toString(), // Assigns a unique ID starting from "1"
-    //     dateOfBirth: "",
-    //     name: { 
-    //       firstName: "",
-    //       lastName: "",
-    //     },
-    //     gender: "",
-    //     contact: {
-    //       emailAddress: "",
-    //       phones: [{
-    //         deviceType: "MOBILE", // or "home", "work"
-    //         countryCallingCode: "+234",
-    //         number: "",
-    //       }],
-    //     },
-    //     documents: [
-    //       {
-    //         documentType: "",
-    //         birthPlace: "",
-    //         issuanceLocation: "",
-    //         issuanceDate: "",
-    //         number: "",
-    //         expiryDate: "",
-    //         issuanceCountry: "",
-    //         validityCountry: "",
-    //         nationality: "",
-    //         holder: true,
-    //       }
-    //     ]
-    //   }))
-    // );
   
     setIsLoading(false); // Optionally stop the loading state if applicable
   };

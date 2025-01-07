@@ -140,62 +140,121 @@ const FlightCard: React.FC<{ result: Flight }> = ({ result }) => {
   //   navigate("/book-flight");
   // };
 
+  // const handleBookFlight = async () => {
+  //   try {
+  //     // Build the payload structure
+  //     const payload = {
+  //       data: {
+  //         type: "flight-offers-pricing",
+  //         flightOffers: [result], // Use the selected flight data here
+  //       },
+  //     };
+
+  //     const confirmPriceToken = localStorage.getItem("confirmPriceToken");
+  //     // console.log('confirmPriceToken testing', confirmPriceToken)
+
+  //     // console.log('confirmPriceToken', confirmPriceToken)
+  
+  //     // Call the API to confirm the price
+  //     const response = await fetch(
+  //       "https://test.ffsdtravels.com/api/flight/price/confirm",
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${confirmPriceToken}`, // Include token if required
+  //           // Authorization: `Bearer ${localStorage.getItem("accesstoken")}`, // Include token if required
+  //         },
+  //         body: JSON.stringify(payload),
+  //       }
+  //     );
+
+  //     console.log("Response:", response);
+  //     // console.log("Response Status:", response.status);
+  //     // console.log("Response Headers:", response.headers);
+  
+  //     const data = await response.json();
+      // console.log('pricedata', data);
+      // console.log('bookingRequirements',  data.data.bookingRequirements);
+      // console.log('emailAddressRequired',  data.data.bookingRequirements.emailAddressRequired);
+
+
+  //     localStorage.setItem("payToken", data.accessToken)
+  //     localStorage.setItem("bookingRequirements", data.data.bookingRequirements)
+  
+  //     if (response.ok) {
+  //       // If price confirmation is successful
+  //       // console.log("Price confirmed:", data);
+  
+  //       // Optionally, store flight details in localStorage
+  //       localStorage.setItem("selectedFlight", JSON.stringify(result));
+  
+  //       // Navigate to the booking page
+  //       navigate("/book-flight");
+  //     } else {
+  //       // Handle errors (e.g., price mismatch or other API errors)
+  //       alert(`Price confirmation failed: ${data.message || "Unknown error"}`);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error confirming price:", error);
+  //     alert("An error occurred while confirming the price. Please try again.");
+  //   }
+  // };
+
   const handleBookFlight = async () => {
     try {
-      // Build the payload structure
+      const confirmPriceToken = localStorage.getItem("confirmPriceToken");
+      if (!confirmPriceToken) {
+        alert("Authorization token is missing. Please log in again.");
+        return;
+      }
+  
       const payload = {
         data: {
           type: "flight-offers-pricing",
           flightOffers: [result], // Use the selected flight data here
         },
       };
-
-      const confirmPriceToken = localStorage.getItem("confirmPriceToken");
-      console.log('confirmPriceToken testing', confirmPriceToken)
-
-      console.log('confirmPriceToken', confirmPriceToken)
   
-      // Call the API to confirm the price
       const response = await fetch(
         "https://test.ffsdtravels.com/api/flight/price/confirm",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${confirmPriceToken}`, // Include token if required
-            // Authorization: `Bearer ${localStorage.getItem("accesstoken")}`, // Include token if required
+            Authorization: `Bearer ${confirmPriceToken}`,
           },
           body: JSON.stringify(payload),
         }
       );
-
-      console.log("Response:", response);
-      console.log("Response Status:", response.status);
-      console.log("Response Headers:", response.headers);
   
       const data = await response.json();
       console.log('pricedata', data);
-
-      localStorage.setItem("payToken", data.accessToken)
+      console.log('bookingRequirements',  data.data.bookingRequirements);
+      console.log('emailAddressRequired',  data.data.bookingRequirements.emailAddressRequired);
   
       if (response.ok) {
-        // If price confirmation is successful
-        console.log("Price confirmed:", data);
+        const { bookingRequirements, accessToken } = data.data;
   
-        // Optionally, store flight details in localStorage
+        localStorage.setItem("payToken", accessToken);
+        localStorage.setItem(
+          "bookingRequirements",
+          JSON.stringify(bookingRequirements)
+        );
         localStorage.setItem("selectedFlight", JSON.stringify(result));
   
-        // Navigate to the booking page
         navigate("/book-flight");
       } else {
-        // Handle errors (e.g., price mismatch or other API errors)
-        alert(`Price confirmation failed: ${data.message || "Unknown error"}`);
+        alert(
+          `Price confirmation failed: ${data.message || "Unknown error"} (Status: ${response.status})`
+        );
       }
     } catch (error) {
       console.error("Error confirming price:", error);
       alert("An error occurred while confirming the price. Please try again.");
     }
   };
+  
   
 
   if (!result.itineraries.length) return null;
@@ -426,10 +485,10 @@ const SearchResult: React.FC<SearchResultProps> = ({ searchData }) => {
     ? location.state.searchResults
     : Object.values(location.state?.searchResults);
 
-  const { searchParams } = location.state || {
-    searchResults: [],
-    // searchParams: {} as SearchParams,
-  };
+  // const { searchParams } = location.state || {
+  //   searchResults: [],
+  //   // searchParams: {} as SearchParams,
+  // };
 
   // Setup pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -438,8 +497,8 @@ const SearchResult: React.FC<SearchResultProps> = ({ searchData }) => {
   const endIndex = startIndex + ITEMS_PER_PAGE;
   const paginatedData = searchResults.slice(startIndex, endIndex);
 
-  console.log(searchResults)
-  console.log("search parameters", searchParams)
+  // console.log(searchResults)
+  // console.log("search parameters", searchParams)
 
   // Return when there are no search results
   if (!searchResults.length) {

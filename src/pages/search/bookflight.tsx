@@ -530,7 +530,7 @@ const BookFlightPage: React.FC = () => {
 
                     <div className="flex flex-col items-end w-[35%]">
                       <p className="font-semibold text-gray-500 capitalize">
-                        {arrivalAirline || "Arrival Airport"}
+                        {arrivalAirline || "Arrival airport"}
                       </p>
                     </div>
                   </div>

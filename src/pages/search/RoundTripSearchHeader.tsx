@@ -736,6 +736,10 @@ const RoundTripSearchHeader: React.FC<RoundTripSearchHeaderProps> = ({
           new Date(searchParams.departureDate),
           "yyyy-MM-dd"
         );
+        const formattedReturnDate = format(
+          new Date(searchParams.returnDate),
+          "yyyy-MM-dd"
+        );
     
         const payload = {
           currencyCode: "NGN",
@@ -749,6 +753,15 @@ const RoundTripSearchHeader: React.FC<RoundTripSearchHeaderProps> = ({
                 time: "10:00:00", // You can make this dynamic if needed
               },
             },
+            {
+              id: "2",
+              originLocationCode: searchParams.arrivalCity, // Reverse for return trip
+              destinationLocationCode: searchParams.departureCity,
+              departureDateTimeRange: {
+                date: formattedReturnDate,
+                time: "10:00:00" // You can make this dynamic if needed
+              }
+            }
           ],
           travelers: [
             ...Array.from({ length: searchParams.adultCount }, (_, i) => ({

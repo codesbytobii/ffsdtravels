@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react";
 import TransactionIcon from "@/assets/svg/TransactionIcon";
-import { format } from "date-fns";
+// import { format } from "date-fns";
 import SelectInput from "@/components/components/input/SelectInput";
 import { Button } from "@/components/ui/button";
 import Dropdown from "@/components/components/dropdown/Dropdown";
@@ -206,8 +206,9 @@ const OneWayTab = () => {
     const apiUrl = 'https://test.ffsdtravels.com/api/flight/search/offer';
 
     // Format departure date to 'YYYY-MM-DD'
-    // const formattedDepartureDate = departureDate.toISOString().split('T')[0];
-    const formattedDepartureDate = format(departureDate, "yyyy-MM-dd");
+    const formattedDepartureDate = departureDate.toLocaleDateString('en-CA');
+    // const formattedDepartureDate = format(departureDate, "yyyy-MM-dd");
+    console.log('formattedDepartureDate', formattedDepartureDate)
     
     // ...existing payload logic...
     const payload = {

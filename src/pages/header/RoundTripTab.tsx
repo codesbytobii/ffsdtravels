@@ -57,7 +57,7 @@ const RoundTripTab = () => {
   const [returnDate, setReturnDate] = useState(new Date());
   const [selectedClass, setSelectedClass] = useState(ticketClasses[0].value);
 
-  // console.log(returnDate)
+  // console.log('departureDate', departureDate)
 
   const showErrorMessage = useCallback((message: string) => {
     toast.error(message);
@@ -208,11 +208,14 @@ const RoundTripTab = () => {
     setFlightSearchLoading(true); // Start loading
     const apiUrl = 'https://test.ffsdtravels.com/api/flight/search/offer';
 
-    console.log("apiUrl", apiUrl)
+    // console.log("apiUrl", apiUrl)
 
     // Format departure date to 'YYYY-MM-DD'
-    const formattedDepartureDate = departureDate.toISOString().split('T')[0];
-    const formattedReturnDate = returnDate.toISOString().split('T')[0];
+    const formattedDepartureDate = departureDate.toLocaleDateString('en-CA');
+    const formattedReturnDate = returnDate.toLocaleDateString('en-CA');
+    // const formattedDepartureDate = format(departureDate, "yyyy-MM-dd");
+    // const formattedReturnDate = format(returnDate, "yyyy-MM-dd");
+    // console.log('formattedDepartureDate', formattedDepartureDate)
 
     // ...existing payload logic...
     const payload = {
@@ -331,6 +334,7 @@ const RoundTripTab = () => {
     []
   );
 
+
   const handleReturnChange = useCallback(
     (date: Date | undefined) => setReturnDate(date || new Date()),
     []
@@ -381,7 +385,7 @@ const RoundTripTab = () => {
 
         <DateInput labelText="Departure" onChange={handleDepartureDateChange} />
 
-        <DateInput labelText="Arrival" onChange={handleReturnChange} />
+        <DateInput labelText="Return" onChange={handleReturnChange} minDate={departureDate} />
 
         <SelectInput
           data={ticketClasses}

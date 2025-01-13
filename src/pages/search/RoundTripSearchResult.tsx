@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/pagination";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Luggage, Plane } from "lucide-react";
+import Loading from "@/components/components/withStatus/loading/Loading";
 
 // Define the types for your data structure
 interface Segment {
@@ -138,18 +139,94 @@ interface FlightCardProps {
   result: Flight;
 }
 
+
 const FlightCard: React.FC<FlightCardProps> = ({
   itinerary1,
   itinerary2,
   result,
 }) => {
   const navigate = useNavigate();
-  const handleBookFlight = () => {
-    localStorage.setItem("selectedFlight", JSON.stringify(result));
-    navigate("/book-flight");
-  };
 
-  console.log("resulttttt", result);
+const [isLoading, setIsLoading] = useState(false);
+
+  const handleBookFlight = async () => {
+
+    setIsLoading(true);
+    try {
+      const confirmPriceToken = localStorage.getItem("confirmPriceToken");
+      if (!confirmPriceToken) {
+        alert("Authorization token is missing. Please log in again.");
+        return;
+      }
+  
+      const payload = {
+        data: {
+          type: "flight-offers-pricing",
+          flightOffers: [result], // Use the selected flight data here
+        },
+      };
+  
+      const response = await fetch(
+        "https://test.ffsdtravels.com/api/flight/price/confirm",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${confirmPriceToken}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+  
+        const data = await response.json();
+        console.log('pricedata', data);
+        console.log('bookingRequirements', data.data.bookingRequirements);
+        console.log('emailAddressRequired', data.data.bookingRequirements.travelerRequirements);
+      
+        if (response.ok) {
+          const { bookingRequirements, accessToken } = data.data;
+      
+          localStorage.setItem("payToken", accessToken);
+          localStorage.setItem(
+            "bookingRequirements",
+            JSON.stringify(bookingRequirements)
+          );
+          localStorage.setItem(
+            "travelerRequirements",
+            JSON.stringify(bookingRequirements.travelerRequirements)
+          );
+          localStorage.setItem("selectedFlight", JSON.stringify(result));
+      
+          const requiredKeys = ['emailAddressRequired', 'mobilePhoneNumberRequired'];
+          const bookingKeys = Object.keys(bookingRequirements);
+      
+          // Check if bookingRequirements has only the required keys
+          const hasOnlyRequiredKeys = 
+            bookingKeys.length === requiredKeys.length &&
+            requiredKeys.every(key => bookingKeys.includes(key));
+      
+          if (hasOnlyRequiredKeys) {
+            navigate("/book-flight");
+          } else {
+            navigate("/book-flight2"); // Change this to your desired alternative route
+          }
+        } else {
+          alert(
+            `Price confirmation failed: ${data.message || "Unknown error"} (Status: ${response.status})`
+          );
+        }
+      } catch (error) {
+        console.error("Error confirming price:", error);
+        alert("An error occurred while confirming the price. Please try again.");
+      }
+      
+  };
+  
+  
+
+  if (!result.itineraries.length) return null;
+
+  // console.log("resulttttt", result);
 
   return (
     <div className="flex flex-col gap-4">
@@ -187,8 +264,14 @@ const FlightCard: React.FC<FlightCardProps> = ({
               <p className="capitalize lg:text-base lg:w-[40%] w-[30%] text-[12px] text-gray-600">
                 <span className="font-bold text-black">Departure Date</span>{" "}
                 <span className="font-medium">
-                  {result.lastTicketingDate &&
-                    formatDate(result.lastTicketingDate)}
+                {formatDate(itinerary1.segments[0].departure.at)}
+                  {/* {result.lastTicketingDate &&
+                    formatDate(result.lastTicketingDate)} */}
+                    {/* {new Date(itinerary1.segments[0].departure.at).toLocaleDateString([], {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                      })} */}
                 </span>
                 <span className="mx-2 w-1 h-1 bg-gray-600 rounded-full"></span>
               </p>
@@ -255,7 +338,7 @@ const FlightCard: React.FC<FlightCardProps> = ({
               className="bg-primaryRed lg:text-sm text-[11px] hover:bg-black text-white"
               onClick={handleBookFlight}
             >
-              <p className="capitalize">book flight</p>
+              {isLoading ? <Loading color="#FFFFFF" size="20" /> : "Book Flight"}
             </Button>
           </div>
                   </>

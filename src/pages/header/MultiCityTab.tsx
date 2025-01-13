@@ -270,7 +270,7 @@ const MultiCityTab = () => {
     originLocationCode: section.departureCity,
     destinationLocationCode: section.arrivalCity,
     departureDateTimeRange: {
-      date: section.departureDate.toISOString().split('T')[0], // Format date as 'YYYY-MM-DD'
+      date: section.departureDate.toLocaleDateString('en-CA'), // Format date as 'YYYY-MM-DD'
       time: "10:00:00", // You can make this dynamic if needed
     },
   }));
@@ -296,7 +296,7 @@ const MultiCityTab = () => {
   ];
 
     // Format departure date to 'YYYY-MM-DD'
-  // const formattedDepartureDate = departureDate.toISOString().split('T')[0];
+  // const formattedDepartureDate = format(departureDate, "yyyy-MM-dd");
     
     // ...existing payload logic...
     const payload = {

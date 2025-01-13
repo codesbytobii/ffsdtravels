@@ -98,9 +98,10 @@ export interface DateInputProps {
   labelText?: string;
   onChange?: (date: Date | undefined) => void;
   value?: Date;
+  minDate?: Date;
 }
 
-const DateInput = ({ labelText = "", onChange, value }: DateInputProps) => {
+const DateInput = ({ labelText = "", onChange, value, minDate }: DateInputProps) => {
   const [date, setDate] = useState<Date | undefined>(value);
   const [isPopoverOpen, setPopoverOpen] = useState(false); // Popover state
 
@@ -154,11 +155,23 @@ const DateInput = ({ labelText = "", onChange, value }: DateInputProps) => {
         <PopoverContent className="w-full p-4 shadow-lg rounded-md bg-white">
           <div className="w-full max-w-[300px] h-[320px]">
             <CustomProvider theme="light">
+              {/* <Calendar
+                value={date}
+                onSelect={handleDateSelect}
+                minDate={minDate}
+                compact
+              /> */}
               <Calendar
                 value={date}
-                onChange={handleDateSelect}
+                onSelect={handleDateSelect}
+                minDate={minDate}
                 compact
+                disabledDate={(currentDate) => {
+                  // Disable dates before the minimum date
+                  return minDate ? currentDate < minDate : false;
+                }}
               />
+
             </CustomProvider>
           </div>
         </PopoverContent>
@@ -168,3 +181,8 @@ const DateInput = ({ labelText = "", onChange, value }: DateInputProps) => {
 };
 
 export default DateInput;
+
+
+
+
+

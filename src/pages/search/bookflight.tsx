@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import Navbar from "@/components/components/navbar/Navbar";
+import Loading from "@/components/components/withStatus/loading/Loading";
 
 // Utility to format numbers as currency
 const formatCurrency = (amount: number) => {
@@ -14,6 +15,12 @@ const formatCurrency = (amount: number) => {
 };
 
 const BookFlightPage: React.FC = () => {
+
+
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+
+
   // State for passenger forms data
   const [passengerForms, setPassengerForms] = useState<
     {
@@ -32,20 +39,6 @@ const BookFlightPage: React.FC = () => {
           number: any;
         }];
       };
-      documents: [
-        {
-          documentType: any;
-          birthPlace: any;
-          issuanceLocation: any;
-          issuanceDate: any;
-          number: any;
-          expiryDate: any;
-          issuanceCountry: any;
-          validityCountry: any;
-          nationality: any;
-          holder: any;
-        }
-      ]
       
     }[]
   >([]);
@@ -96,7 +89,7 @@ const BookFlightPage: React.FC = () => {
   
   const handlePassengerChange = (
     index: number,
-    field: string,
+    field: any,
     value: any
   ) => {
     const updatedForms = [...passengerForms];
@@ -111,7 +104,7 @@ const BookFlightPage: React.FC = () => {
   useEffect(() => {
     const storedFlightData = localStorage.getItem("selectedFlight");
 
-    console.log('storedflightdata', storedFlightData)
+    // console.log('storedflightdata', storedFlightData)
   
     if (storedFlightData) {
       const parsedFlightDetails = JSON.parse(storedFlightData);
@@ -165,6 +158,8 @@ const BookFlightPage: React.FC = () => {
       handleBooking()
         alert('Transaction successful! Reference: ' + response.reference);
         // Implement server-side to validate payment status
+        // setPopupMessage("Payment Successful. Wait for your Flight to be reserved");
+        // setIsPopupOpen(true);
     }
 
     function onCancel() {
@@ -206,7 +201,7 @@ const BookFlightPage: React.FC = () => {
         data: {
           type: "flight-order",
           flightOffers: [flightDetails],
-          travelers: [passengerForms],
+          travelers: passengerForms,
           remarks: {
             general: [
               {
@@ -271,9 +266,11 @@ const BookFlightPage: React.FC = () => {
       );
 
       if (response.ok) {
-        // console.log("Flight booked successfully:", );
+        setPopupMessage("Flight booked successfully!");
+        setIsPopupOpen(true);
+        // console.log("Flight booked successfully:", response );
         // const result = await response.json();
-        alert("Flight booked successfully!");
+        // alert("Flight booked successfully!");
         const totalTravelers = flightDetails.travelerPricings.length;
     setPassengerForms(
       Array.from({ length: totalTravelers }, (_, index) => ({
@@ -288,24 +285,10 @@ const BookFlightPage: React.FC = () => {
           emailAddress: "",
           phones: [{
             deviceType: "MOBILE", // or "home", "work"
-            countryCallingCode: "+234",
+            countryCallingCode: "34",
             number: "12345678",
           }],
-        },
-        documents: [
-          {
-            documentType: "",
-            birthPlace: "",
-            issuanceLocation: "",
-            issuanceDate: "",
-            number: "",
-            expiryDate: "",
-            issuanceCountry: "",
-            validityCountry: "",
-            nationality: "",
-            holder: true,
-          }
-        ]
+        }
       }))
     );
       } else {
@@ -329,8 +312,6 @@ const BookFlightPage: React.FC = () => {
     // Initiate the payment
     initiatePayment();
   
-  
-    setIsLoading(false); // Optionally stop the loading state if applicable
   };
   
 
@@ -401,26 +382,14 @@ const BookFlightPage: React.FC = () => {
           gender: "",
           contact: {
             emailAddress: "",
-            phones: [{
+            phones: [
+              {
               deviceType: "MOBILE", // or "home", "work"
-              countryCallingCode: "+234",
+              countryCallingCode: "34",
               number: "",
-            }],
-          },
-          documents: [
-            {
-              documentType: "",
-              birthPlace: "",
-              issuanceLocation: "",
-              issuanceDate: "",
-              number: "",
-              expiryDate: "",
-              issuanceCountry: "",
-              validityCountry: "",
-              nationality: "",
-              holder: true,
             }
-          ]
+          ],
+          }
         }))
       );
       
@@ -441,6 +410,7 @@ const BookFlightPage: React.FC = () => {
       </div>
     );
   }
+
 
   return (
     <>
@@ -600,180 +570,27 @@ const BookFlightPage: React.FC = () => {
                           className="w-full p-2 border border-gray-300 rounded"
                         >
                           <option value="">Select Gender</option>
-                          <option value="male">Male</option>
-                          <option value="female">Female</option>
-                          <option value="other">Other</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label htmlFor={`documentType-${index}`} className="block font-medium">
-                          Document Type
-                        </label>
-                        <input
-                        type="text"
-                          id={`documentType-${index}`}
-                          value={form.documents[0].documentType}
-                          onChange={(e) =>
-                            handlePassengerChange(index, "documents[0].documentType", e.target.value)
-                          }
-                          
-                          className="w-full p-2 border border-gray-300 rounded"
-                        />
-                      </div>
-
-                      <div>
-                        <label htmlFor={`birthPlace-${index}`} className="block font-medium">
-                          Birth Place
-                        </label>
-                        <input
-                        type="text"
-                          id={`birthPlace-${index}`}
-                          value={form.documents[0].birthPlace}
-                          onChange={(e) =>
-                            handlePassengerChange(index, "documents[0].birthPlace", e.target.value)
-                          }
-                          
-                          className="w-full p-2 border border-gray-300 rounded"
-                        />
-                      </div>
-
-                      <div>
-                        <label htmlFor={`issuanceLocation-${index}`} className="block font-medium">
-                          Issuance Location
-                        </label>
-                        <input
-                        type="text"
-                          id={`issuanceLocation-${index}`}
-                          value={form.documents[0].issuanceLocation}
-                          onChange={(e) =>
-                            handlePassengerChange(index, "documents[0].issuanceLocation", e.target.value)
-                          }
-                          
-                          className="w-full p-2 border border-gray-300 rounded"
-                        />
-                      </div>
-
-                      <div>
-                        <label htmlFor={`issuanceDate-${index}`} className="block font-medium">
-                         Issuance Date
-                        </label>
-                        <input
-                        type="date"
-                          id={`issuanceDate-${index}`}
-                          value={form.documents[0].issuanceDate}
-                          onChange={(e) =>
-                            handlePassengerChange(index, "documents[0].issuanceDate", e.target.value)
-                          }
-                          
-                          className="w-full p-2 border border-gray-300 rounded"
-                        />
-                      </div>
-
-                      <div>
-                        <label htmlFor={`number-${index}`} className="block font-medium">
-                         Number
-                        </label>
-                        <input
-                        type="text"
-                          id={`number-${index}`}
-                          value={form.documents[0].number}
-                          onChange={(e) =>
-                            handlePassengerChange(index, "documents[0].number", e.target.value)
-                          }
-                          
-                          className="w-full p-2 border border-gray-300 rounded"
-                        />
-                      </div>
-
-                      <div>
-                        <label htmlFor={`expiryDate-${index}`} className="block font-medium">
-                         Expiry Date
-                        </label>
-                        <input
-                        type="date"
-                          id={`expiryDate-${index}`}
-                          value={form.documents[0].expiryDate}
-                          onChange={(e) =>
-                            handlePassengerChange(index, "documents[0].expiryDate", e.target.value)
-                          }
-                          
-                          className="w-full p-2 border border-gray-300 rounded"
-                        />
-                      </div>
-
-                      <div>
-                        <label htmlFor={`issuanceCountry-${index}`} className="block font-medium">
-                          Issuance Country
-                        </label>
-                        <input
-                        type="text"
-                          id={`issuanceCountry-${index}`}
-                          value={form.documents[0].issuanceCountry}
-                          onChange={(e) =>
-                            handlePassengerChange(index, "documents[0].issuanceCountry", e.target.value)
-                          }
-                          
-                          className="w-full p-2 border border-gray-300 rounded"
-                        />
-                      </div>
-
-                      <div>
-                        <label htmlFor={`validityCountry-${index}`} className="block font-medium">
-                          Validity Country
-                        </label>
-                        <input
-                        type="text"
-                          id={`validityCountry-${index}`}
-                          value={form.documents[0].validityCountry}
-                          onChange={(e) =>
-                            handlePassengerChange(index, "documents[0].validityCountry", e.target.value)
-                          }
-                          
-                          className="w-full p-2 border border-gray-300 rounded"
-                        />
-                      </div>
-
-                      <div>
-                        <label htmlFor={`nationality-${index}`} className="block font-medium">
-                          Nationality
-                        </label>
-                        <input
-                        type="text"
-                          id={`nationality-${index}`}
-                          value={form.documents[0].nationality}
-                          onChange={(e) =>
-                            handlePassengerChange(index, "documents[0].nationality", e.target.value)
-                          }
-                          
-                          className="w-full p-2 border border-gray-300 rounded"
-                        />
-                      </div>
-
-                      <div>
-                        <label htmlFor={`holder-${index}`} className="block font-medium">
-                          Holder
-                        </label>
-                        <select
-                          id={`holder-${index}`}
-                          value={form.documents[0].holder}
-                          onChange={(e) =>
-                            handlePassengerChange(index, "documents[0].holder", e.target.value)
-                          }
-                          
-                          className="w-full p-2 border border-gray-300 rounded"
-                        >
-                          <option value="">Select Holder</option>
-                          <option value="true">True</option>
-                          <option value="false">False</option>
+                          <option value="MALE">Male</option>
+                          <option value="FEMALE">Female</option>
                         </select>
                       </div>
                       
                     </div>
                   ))}
                   <Button type="submit" className="bg-primaryRed text-white mt-4">
-                    {isLoading ? "Submitting..." : "Submit"}
+                    {/* {isLoading ? "Submitting..." : "Submit"} */}
+                    {isLoading ? <Loading color="#FFFFFF" size="20" /> : "Submit"}
                   </Button>
+
+                  {isPopupOpen && (
+        <div className="popup-overlay">
+          <div className="popup">
+            <h2>Booking Status</h2>
+            <p>{popupMessage}</p>
+            <button onClick={() => setIsPopupOpen(false)}>Close</button>
+          </div>
+        </div>
+      )}
                 </form>
               </CardContent>
             </Card>
@@ -814,3 +631,4 @@ const BookFlightPage: React.FC = () => {
 };
 
 export default BookFlightPage;
+

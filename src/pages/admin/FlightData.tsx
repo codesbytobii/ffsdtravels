@@ -1,141 +1,209 @@
 // import { useEffect, useState } from "react";
 // import axios, { AxiosError } from "axios";
-// import { BASE_URL } from "@/config/api";
 // import { toast } from "react-toastify";
+// import Modal from "@/components/components/modal/Modal";
+// import { Button } from "@/components/ui/button";
 // import CustomTable from "@/components/components/table/CustomTable";
 
-// interface User {
-//   id: number;
-//   lastName: string;
-//   firstName: string;
-//   email: string;
-//   phone: string;
-//   companyName: string;
-//   companyCountry: string;
-//   user_type: string;
-//   paymentType: string;
-//   created_at: string;
-//   updated_at: string;
-//   edit?: string;
+// interface FlightDetails {
+//   reference: string;
+//   flightNumber: string;
+//   departure: string;
+//   arrival: string;
+//   departureTime: string;
+//   arrivalTime: string;
+//   airline: string;
+//   status: string;
+//   order_id: string;
+//   itinerary: {
+//     order_id: string;
+//   }
+//   associated_records?: {
+//     pnr: string;
+//     id: string;
+//   }
 // }
 
 // interface ErrorResponseData {
 //   message?: string;
-//   errors?: {
-//     [key: string]: string[];
-//   };
 // }
 
 // const FlightData: React.FC = () => {
-//   const [users, setUsers] = useState<User[]>([]);
+//   const [flights, setFlights] = useState<FlightDetails[]>([]);
 //   const [isLoading, setIsLoading] = useState(true);
-//   const [currentPage, setCurrentPage] = useState(1);
-//   const [totalPages, setTotalPages] = useState(1);
-// //   const [isCreateFormOpen, setIsCreateFormOpen] = useState<boolean>(false);
-// //   const [editingUser, setEditingUser] = useState<User | null>(null);
+//   const [modalOpen, setModalOpen] = useState(false);
+//   const [markupPercentage, setMarkupPercentage] = useState("");
+//   const [loading, setLoading] = useState(false);
+//   const [error, setError] = useState("");
 
-//   const formatDate = (dateString: string) => {
-//     const date = new Date(dateString);
-//     const day = String(date.getDate()).padStart(2, "0");
-//     const month = String(date.getMonth() + 1).padStart(2, "0");
-//     const year = date.getFullYear();
-
-//     return `${day}-${month}-${year}`;
+//   const toggleModal = async () => {
+//     setModalOpen(!modalOpen);
+//     if (!modalOpen) {
+//       await fetchMarkupPercentage();
+//     }
 //   };
 
-//   useEffect(() => {
-//     const userToken = localStorage.getItem("userToken");
+//   const validatePercentage = (value: string): boolean => {
+//     const number = parseFloat(value);
+//     return !isNaN(number) && number >= 0 && number <= 100;
+//   };
 
-//     if (!userToken) {
+//   const getToken = (): string | null => {
+//     return localStorage.getItem("userToken");
+//   };
+
+//   const fetchMarkupPercentage = async () => {
+//     const token = getToken();
+//     if (!token) {
 //       toast.error("User token is missing. Please log in.");
 //       return;
 //     }
 
-//     const fetchUsers = async (page: number) => {
+//     try {
+//       const response = await axios.get("https://test.ffsdtravels.com/api/markup/show/15", {
+//         headers: {
+//           Authorization: `Bearer ${token}`,
+//           Accept: "application/json",
+//         },
+//       });
+
+//       const fee_percentage = response.data.data.fee_percentage;
+//       console.log('markupresponse', response.data.data.fee_percentage)
+//       setMarkupPercentage(fee_percentage.toString());
+//     } catch (error) {
+//       const err = error as AxiosError<ErrorResponseData>;
+//       toast.error(err.response?.data?.message || "Failed to fetch markup percentage.");
+//     }
+//   };
+
+//   const handleSubmit = async (e: React.FormEvent) => {
+//     e.preventDefault();
+
+//     if (!validatePercentage(markupPercentage)) {
+//       setError("Please enter a valid markup percentage between 0 and 100.");
+//       return;
+//     }
+
+//     const token = getToken();
+//     if (!token) {
+//       toast.error("User token is missing. Please log in.");
+//       return;
+//     }
+
+//     setLoading(true);
+//     setError("");
+//     try {
+//       const markUpUrl = "https://test.ffsdtravels.com/api/markup/update/15";
+//       const payload = {
+//         fee_name: "markup",
+//         fee_percentage: parseFloat(markupPercentage),
+//       };
+
+//       const response = await fetch(markUpUrl, {
+//         method: "POST",
+//         headers: {
+//           "Content-Type": "application/json",
+//           Authorization: `Bearer ${token}`,
+//         },
+//         body: JSON.stringify(payload),
+//       });
+
+//       if (response.ok) {
+//         toast.success("Markup applied successfully!");
+//         setModalOpen(false);
+//       } else {
+//         throw new Error("Failed to apply markup");
+//       }
+//     } catch (error) {
+//       toast.error("Error applying markup. Please try again later.");
+//       console.error("Error applying markup:", error);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     const token = getToken();
+
+//     if (!token) {
+//       toast.error("User token is missing. Please log in.");
+//       return;
+//     }
+
+//     const fetchBookedFlights = async () => {
 //       try {
-//         const response = await axios.get(`${BASE_URL}users/all?page=${page}`, {
-//           headers: {
-//             Authorization: `Bearer ${userToken}`,
-//             Accept: "application/json",
-//           },
-//         });
+//         const responses = await axios.get(
+//           "https://test.ffsdtravels.com/api/get/flights/booked",
+//           {
+//             headers: {
+//               Authorization: `Bearer ${token}`,
+//               Accept: "application/json",
+//             },
+//           }
+//         );
 
-//         const { data, current_page, last_page } = response?.data?.users;
+//         const flightsData = responses?.data?.data;
 
-//         const formattedData = data.map((item: User) => ({
-//           ...item,
-//           name: `${item.lastName} ${item.firstName}`,
-//           created_at: formatDate(item.created_at),
-//           updated_at: formatDate(item.updated_at),
+//         const formattedFlights = flightsData.map((flight: FlightDetails) => ({
+//           reference: flight.reference,
+//           pnr: flight.associated_records[0].pnr,
 //         }));
 
-//         setUsers(formattedData);
-//         setCurrentPage(current_page);
-//         setTotalPages(last_page);
-//         setIsLoading(false);
+//         setFlights(formattedFlights);
 //       } catch (error) {
 //         const err = error as AxiosError<ErrorResponseData>;
-//         if (err.response?.data?.message) {
-//           toast.error(err.response.data.message);
-//         } else {
-//           toast.error("An unexpected error occurred.");
-//         }
+//         toast.error(err.response?.data?.message || "An unexpected error occurred.");
 //       } finally {
 //         setIsLoading(false);
 //       }
 //     };
 
-//     fetchUsers(currentPage);
-//   }, [currentPage]);
-
-// //   const handleEdit = (user: User) => {
-// //     setEditingUser(user);
-// //     setIsCreateFormOpen(true);
-// //   };
-
-// //   const handleUpdateUser = (updatedUser: User) => {
-// //     setUsers((prevUsers) =>
-// //       prevUsers.map((user) => (user.id === updatedUser.id ? updatedUser : user))
-// //     );
-// //     setEditingUser(null);
-// //     setIsCreateFormOpen(false);
-// //     toast.success("User updated successfully.");
-// //   };
-
-// //   const handleCancelEdit = () => {
-// //     setEditingUser(null);
-// //     setIsCreateFormOpen(false);
-// //   };
+//     fetchBookedFlights();
+//   }, []);
 
 //   const columns = [
-//     { header: "Name", accessor: "name" },
-//     { header: "DOB", accessor: "user_type" },
-//     { header: "Phone Number", accessor: "phone" },
-//     { header: "Email Address", accessor: "email" },
-//     { header: "Created At", accessor: "created_at" },
-//     { header: "Updated At", accessor: "updated_at" },
-//     // {
-//     //   header: "Edit",
-//     //   accessor: "edit",
-//     //   Cell: ({ row }: { row: { original: User } }) => (
-//     //     <button onClick={() => handleEdit(row.original)}>
-//     //       <FaEdit className="text-blue-500 hover:text-blue-700" />
-//     //     </button>
-//     //   ),
-//     // },
+//     { header: "Reference Number", accessor: "reference" },
+//     { header: "PNR NUMBER", accessor: "pnr" },
 //   ];
 
 //   return (
-//     <div className="flex flex-col ">
-      
+//     <div className="flex flex-col">
+//       <div className="flex gap-4 mt-5">
+//         <Button
+//           onClick={toggleModal}
+//           className="bg-primaryRed text-white w-52 rounded capitalize"
+//           aria-label="Mark Up"
+//         >
+//           Mark Up
+//         </Button>
+
+//         <Modal isOpen={modalOpen} onClose={toggleModal}>
+//           <div className="flex flex-col lg:p-10 md:p-8 sm:p-6 p-4">
+//             <h2 className="text-lg font-semibold mb-4">Enter The MarkUp Percentage</h2>
+//             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+//               <input
+//                 type="number"
+//                 value={markupPercentage}
+//                 onChange={(e) => setMarkupPercentage(e.target.value)}
+//                 placeholder="Enter Markup Percentage"
+//                 className="border border-gray-300 w-full sm:w-[500px] rounded-md p-2 focus:outline-none focus:border-primaryRed"
+//               />
+//               {error && <p className="text-red-500 text-sm">{error}</p>}
+//               <Button type="submit" className="bg-primaryRed text-white" disabled={loading}>
+//                 {loading ? "Submitting..." : "Submit"}
+//               </Button>
+//             </form>
+//           </div>
+//         </Modal>
+//       </div>
 //       <div className="mt-7">
 //         <CustomTable
-//           data={users}
+//           data={flights}
 //           columns={columns}
 //           isLoading={isLoading}
-//           totalPages={totalPages}
-//           currentPage={currentPage}
-//           onPageChange={setCurrentPage}
+//           totalPages={1}
+//           currentPage={1}
+//           onPageChange={() => {}}
 //         />
 //       </div>
 //     </div>
@@ -147,13 +215,22 @@
 
 
 
+
+
+
+
+
+
+
 // import { useEffect, useState } from "react";
 // import axios, { AxiosError } from "axios";
 // import { toast } from "react-toastify";
+// import Modal from "@/components/components/modal/Modal";
+// import { Button } from "@/components/ui/button";
 // import CustomTable from "@/components/components/table/CustomTable";
 
 // interface FlightDetails {
-//   id: number;
+//   reference: string;
 //   flightNumber: string;
 //   departure: string;
 //   arrival: string;
@@ -161,6 +238,20 @@
 //   arrivalTime: string;
 //   airline: string;
 //   status: string;
+//   order_id: string;
+//   itinerary: {
+//     order_id: string;
+//   }
+//   associated_records?: {
+//     pnr: string;
+//     id: string;
+//   }
+// }
+
+// interface Markup {
+//   id: number;
+//   fee_name: string;
+//   fee_percentage: number;
 // }
 
 // interface ErrorResponseData {
@@ -168,75 +259,82 @@
 // }
 
 // const FlightData: React.FC = () => {
-//   const [flight, setFlight] = useState<FlightDetails | null>(null);
+//   const [flights, setFlights] = useState<FlightDetails[]>([]);
 //   const [isLoading, setIsLoading] = useState(true);
+//   const [modalOpen, setModalOpen] = useState(false);
+//   const [markups, setMarkups] = useState<Markup[]>([]);
+//   const [loading, setLoading] = useState(false);
 
-//   useEffect(() => {
-//     const userToken = localStorage.getItem("userToken");
+//   const toggleModal = () => setModalOpen(!modalOpen);
 
-//     if (!userToken) {
+//   const getToken = (): string | null => {
+//     return localStorage.getItem("userToken");
+//   };
+
+//   const fetchMarkups = async () => {
+//     const token = getToken();
+//     if (!token) {
 //       toast.error("User token is missing. Please log in.");
 //       return;
 //     }
 
-//     const fetchFlightDetails = async () => {
-//       try {
-//         const response = await axios.get(
-//           "https://test.ffsdtravels.com/api/flight/get/flight/details?flightOrderId=eJzTd9f3DbVwCvUDAAtGAmU%3D",
-//           {
-//             headers: {
-//               Authorization: `Bearer ${userToken}`,
-//               Accept: "application/json",
-//             },
-//           }
-//         );
+//     setLoading(true);
 
-//         const flightData = response.data.flight; // Adjust based on actual response structure
+//     try {
+//       const response = await axios.get("https://test.ffsdtravels.com/api/markup/home", {
+//         headers: {
+//           Authorization: `Bearer ${token}`,
+//           Accept: "application/json",
+//         },
+//       });
 
-//         setFlight({
-//           id: flightData.id,
-//           flightNumber: flightData.flightNumber,
-//           departure: flightData.departure,
-//           arrival: flightData.arrival,
-//           departureTime: new Date(flightData.departureTime).toLocaleString(),
-//           arrivalTime: new Date(flightData.arrivalTime).toLocaleString(),
-//           airline: flightData.airline,
-//           status: flightData.status,
-//         });
+//       console.log("Markups Response:", response.data);
 
-//         setIsLoading(false);
-//       } catch (error) {
-//         const err = error as AxiosError<ErrorResponseData>;
-//         toast.error(err.response?.data?.message || "An unexpected error occurred.");
-//       } finally {
-//         setIsLoading(false);
-//       }
-//     };
+//       const markupsData = response.data?.data || [];
+//       setMarkups(markupsData);
+//     } catch (error) {
+//       const err = error as AxiosError<ErrorResponseData>;
+//       toast.error(err.response?.data?.message || "Failed to fetch markups.");
+//       console.error("Error fetching markups:", error);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
 
-//     fetchFlightDetails();
+//   useEffect(() => {
+//     fetchMarkups();
 //   }, []);
 
 //   const columns = [
-//     { header: "Flight Number", accessor: "flightNumber" },
-//     { header: "Departure", accessor: "departure" },
-//     { header: "Arrival", accessor: "arrival" },
-//     { header: "Departure Time", accessor: "departureTime" },
-//     { header: "Arrival Time", accessor: "arrivalTime" },
-//     { header: "Airline", accessor: "airline" },
-//     { header: "Status", accessor: "status" },
+//     { header: "ID", accessor: "id" },
+//     { header: "Fee Name", accessor: "fee_name" },
+//     { header: "Fee Percentage", accessor: "fee_percentage" },
 //   ];
 
 //   return (
 //     <div className="flex flex-col">
-//       <div className="mt-7">
-//         <CustomTable
-//           data={flight ? [flight] : []}
-//           columns={columns}
-//           isLoading={isLoading}
-//           totalPages={1}
-//           currentPage={1}
-//           onPageChange={() => {}}
-//         />
+//       <div className="flex gap-4 mt-5">
+//         <Button
+//           onClick={toggleModal}
+//           className="bg-primaryRed text-white w-52 rounded capitalize"
+//           aria-label="View Markups"
+//         >
+//           View Markups
+//         </Button>
+
+//         <Modal isOpen={modalOpen} onClose={toggleModal}>
+//           <div className="flex flex-col lg:p-10 md:p-8 sm:p-6 p-4">
+//             <h2 className="text-lg font-semibold mb-4">Markup Details</h2>
+//             <CustomTable
+//               data={markups}
+//               columns={columns}
+//               isLoading={loading}
+//               totalPages={1}
+//               currentPage={1}
+//               onPageChange={() => {}}
+//             />
+//           </div>
+//         </Modal>
 //       </div>
 //     </div>
 //   );
@@ -256,7 +354,7 @@
 // import CustomTable from "@/components/components/table/CustomTable";
 
 // interface FlightDetails {
-//   id: number;
+//   reference: string;
 //   flightNumber: string;
 //   departure: string;
 //   arrival: string;
@@ -264,6 +362,20 @@
 //   arrivalTime: string;
 //   airline: string;
 //   status: string;
+//   order_id: string;
+//   itinerary: {
+//     order_id: string;
+//   }
+//   associated_records?: {
+//     pnr: string;
+//     id: string;
+//   }
+// }
+
+// interface Markup {
+//   id: number;
+//   fee_name: string;
+//   fee_percentage: number;
 // }
 
 // interface ErrorResponseData {
@@ -274,109 +386,324 @@
 //   const [flights, setFlights] = useState<FlightDetails[]>([]);
 //   const [isLoading, setIsLoading] = useState(true);
 //   const [modalOpen, setModalOpen] = useState(false);
+//   const [markups, setMarkups] = useState<Markup[]>([]);
+//   const [loading, setLoading] = useState(false);
+
 //   const toggleModal = () => setModalOpen(!modalOpen);
-//   const [markupPercentage, setMarkupPercentage] = useState(""); // State to manage PNR number
-//   const [loading, setLoading] = useState(false); // State to track loading
-//   const [error, setError] = useState(""); // State to track errors
 
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     if (markupPercentage.trim()) {
-//       setLoading(true);
-//       setError(""); // Clear previous errors
-//       try {
-//         // Define the API URL
-//         const apiUrl = "https://test.ffsdtravels.com/api/markup/create";
-  
-//         // Define the payload for the POST request
-//         const payload = {
-//           percentage: parseFloat(markupPercentage), // Convert the input to a number
-//         };
-  
-//         // Make the POST request to the API
-//         const response = await fetch(apiUrl, {
-//           method: "POST",
-//           headers: {
-//             "Content-Type": "application/json",
-//           },
-//           body: JSON.stringify(payload),
-//         });
-//         console.log(response)
-  
-//         // If response is successful
-//         if (response.ok) {
-//           const data = await response.json();
-//           console.log("Markup Applied Successfully:", data);
-//           setModalOpen(false); // Close the modal after successful submission
-//           // Optionally, handle the data here (e.g., show a success message, navigate, etc.)
-//         } else {
-//           throw new Error("Failed to apply markup");
-//         }
-//       } catch (error) {
-//         setError("Error applying markup. Please try again later.");
-//         console.error("Error applying markup:", error);
-//       } finally {
-//         setLoading(false);
-//       }
-//     } else {
-//       alert("Please enter a valid markup percentage.");
-//     }
+//   const getToken = (): string | null => {
+//     return localStorage.getItem("userToken");
 //   };
-  
 
-//   useEffect(() => {
-//     const userToken = localStorage.getItem("userToken");
-
-//     if (!userToken) {
+//   const fetchMarkups = async () => {
+//     const token = getToken();
+//     if (!token) {
 //       toast.error("User token is missing. Please log in.");
 //       return;
 //     }
 
-//     const fetchBookedFlights = async () => {
-//       try {
-//         const response = await axios.get(
-//           "https://test.ffsdtravels.com/api/get/flights/booked",
-//           {
-//             headers: {
-//               Authorization: `Bearer ${userToken}`,
-//               Accept: "application/json",
-//             },
-//           }
-//         );
+//     setLoading(true);
 
-//         const flightsData = response.data.flights; // Adjust based on actual response structure
+//     try {
+//       const response = await axios.get("https://test.ffsdtravels.com/api/markup/home", {
+//         headers: {
+//           Authorization: `Bearer ${token}`,
+//           Accept: "application/json",
+//         },
+//       });
 
-//         const formattedFlights = flightsData.map((flight: any) => ({
-//           id: flight.id,
-//           flightNumber: flight.flightNumber,
-//           departure: flight.departure,
-//           arrival: flight.arrival,
-//           departureTime: new Date(flight.departureTime).toLocaleString(),
-//           arrivalTime: new Date(flight.arrivalTime).toLocaleString(),
-//           airline: flight.airline,
-//           status: flight.status,
-//         }));
+//       console.log("Markups Response:", response.data);
 
-//         setFlights(formattedFlights);
-//       } catch (error) {
-//         const err = error as AxiosError<ErrorResponseData>;
-//         toast.error(err.response?.data?.message || "An unexpected error occurred.");
-//       } finally {
-//         setIsLoading(false);
+//       const markupsData = response.data?.data || [];
+//       setMarkups(markupsData);
+//     } catch (error) {
+//       const err = error as AxiosError<ErrorResponseData>;
+//       toast.error(err.response?.data?.message || "Failed to fetch markups.");
+//       console.error("Error fetching markups:", error);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const handleEdit = (id: number) => {
+//     // Logic to handle edit action
+//     toast.info(`Edit functionality for ID: ${id}`);
+//     // You can add logic to open an edit modal or navigate to an edit page
+//   };
+
+//   const handleDelete = async (id: number) => {
+//     const token = getToken();
+//     if (!token) {
+//       toast.error("User token is missing. Please log in.");
+//       return;
+//     }
+
+//     try {
+//       const response = await axios.delete(`https://test.ffsdtravels.com/api/markup/delete/${id}`, {
+//         headers: {
+//           Authorization: `Bearer ${token}`,
+//         },
+//       });
+
+//       if (response.status === 200) {
+//         toast.success("Markup deleted successfully.");
+//         setMarkups((prev) => prev.filter((markup) => markup.id !== id));
 //       }
-//     };
+//     } catch (error) {
+//       const err = error as AxiosError<ErrorResponseData>;
+//       toast.error(err.response?.data?.message || "Failed to delete markup.");
+//       console.error("Error deleting markup:", error);
+//     }
+//   };
 
-//     fetchBookedFlights();
+//   useEffect(() => {
+//     fetchMarkups();
 //   }, []);
 
 //   const columns = [
-//     { header: "Flight Number", accessor: "flightNumber" },
-//     { header: "Departure", accessor: "departure" },
-//     { header: "Arrival", accessor: "arrival" },
-//     { header: "Departure Time", accessor: "departureTime" },
-//     { header: "Arrival Time", accessor: "arrivalTime" },
-//     { header: "Airline", accessor: "airline" },
-//     { header: "Status", accessor: "status" },
+//     { header: "ID", accessor: "id" },
+//     { header: "Fee Name", accessor: "fee_name" },
+//     { header: "Fee Percentage", accessor: "fee_percentage" },
+//     {
+//       header: "Actions",
+//       accessor: "actions", // Optional, not used for rendering
+//       Cell: ({ row: { original } }: { row: { original: Markup } }) => (
+//         <div className="flex gap-2">
+//           <button
+//             onClick={() => handleEdit(original.id)}
+//             className="bg-blue-500 text-white px-3 py-1 rounded"
+//           >
+//             Edit
+//           </button>
+//           <button
+//             onClick={() => handleDelete(original.id)}
+//             className="bg-red-500 text-white px-3 py-1 rounded"
+//           >
+//             Delete
+//           </button>
+//         </div>
+//       ),
+//     },
+//   ];
+  
+
+//   return (
+//     <div className="flex flex-col">
+//       <div className="flex gap-4 mt-5">
+//         <Button
+//           onClick={toggleModal}
+//           className="bg-primaryRed text-white w-52 rounded capitalize"
+//           aria-label="View Markups"
+//         >
+//           View Markups
+//         </Button>
+
+//         <Modal isOpen={modalOpen} onClose={toggleModal}>
+//           <div className="flex flex-col lg:p-10 md:p-8 sm:p-6 p-4">
+//             <h2 className="text-lg font-semibold mb-4">Markup Details</h2>
+//             <CustomTable
+//               data={markups}
+//               columns={columns}
+//               isLoading={loading}
+//               totalPages={1}
+//               currentPage={1}
+//               onPageChange={() => {}}
+//             />
+//           </div>
+//         </Modal>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default FlightData;
+
+
+
+
+
+// import { useEffect, useState } from "react";
+// import axios, { AxiosError } from "axios";
+// import { toast } from "react-toastify";
+// import Modal from "@/components/components/modal/Modal";
+// import { Button } from "@/components/ui/button";
+// import CustomTable from "@/components/components/table/CustomTable";
+
+// interface Markup {
+//   id: number;
+//   fee_name: string;
+//   fee_percentage: number;
+// }
+
+// interface ErrorResponseData {
+//   message?: string;
+// }
+
+// const FlightData: React.FC = () => {
+//   const [markups, setMarkups] = useState<Markup[]>([]);
+//   const [loading, setLoading] = useState(false);
+//   const [modalOpen, setModalOpen] = useState(false);
+//   const [editingRowId, setEditingRowId] = useState<number | null>(null);
+//   const [updatedPercentage, setUpdatedPercentage] = useState<number | null>(null);
+
+//   const toggleModal = () => setModalOpen(!modalOpen);
+
+//   const getToken = (): string | null => {
+//     return localStorage.getItem("userToken");
+//   };
+
+//   const fetchMarkups = async () => {
+//     const token = getToken();
+//     if (!token) {
+//       toast.error("User token is missing. Please log in.");
+//       return;
+//     }
+
+//     setLoading(true);
+
+//     try {
+//       const response = await axios.get("https://test.ffsdtravels.com/api/markup/home", {
+//         headers: {
+//           Authorization: `Bearer ${token}`,
+//           Accept: "application/json",
+//         },
+//       });
+
+//       const markupsData = response.data?.data || [];
+//       setMarkups(markupsData);
+//     } catch (error) {
+//       const err = error as AxiosError<ErrorResponseData>;
+//       toast.error(err.response?.data?.message || "Failed to fetch markups.");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const handleEdit = (id: number, currentPercentage: number) => {
+//     setEditingRowId(id);
+//     setUpdatedPercentage(currentPercentage);
+//   };
+
+//   const handleSave = async (id: number) => {
+//     if (updatedPercentage === null) return;
+
+//     const token = getToken();
+//     if (!token) {
+//       toast.error("User token is missing. Please log in.");
+//       return;
+//     }
+
+//     try {
+//       await axios.put(
+//         `https://test.ffsdtravels.com/api/markup/${id}`,
+//         { fee_percentage: updatedPercentage },
+//         {
+//           headers: {
+//             Authorization: `Bearer ${token}`,
+//             Accept: "application/json",
+//           },
+//         }
+//       );
+//       toast.success("Fee percentage updated successfully!");
+//       setMarkups((prevMarkups) =>
+//         prevMarkups.map((markup) =>
+//           markup.id === id ? { ...markup, fee_percentage: updatedPercentage } : markup
+//         )
+//       );
+//     } catch (error) {
+//       toast.error("Failed to update fee percentage.");
+//     } finally {
+//       setEditingRowId(null);
+//     }
+//   };
+
+//   const handleCancel = () => {
+//     setEditingRowId(null);
+//   };
+
+//   const handleDelete = async (id: number) => {
+//     const token = getToken();
+//     if (!token) {
+//       toast.error("User token is missing. Please log in.");
+//       return;
+//     }
+
+//     try {
+//       await axios.delete(`https://test.ffsdtravels.com/api/markup/${id}`, {
+//         headers: {
+//           Authorization: `Bearer ${token}`,
+//           Accept: "application/json",
+//         },
+//       });
+//       toast.success("Markup deleted successfully!");
+//       setMarkups((prevMarkups) => prevMarkups.filter((markup) => markup.id !== id));
+//     } catch (error) {
+//       toast.error("Failed to delete markup.");
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchMarkups();
+//   }, []);
+
+//   const columns = [
+//     { header: "ID", accessor: "id" },
+//     { header: "Fee Name", accessor: "fee_name" },
+//     {
+//       header: "Fee Percentage",
+//       accessor: "fee_percentage",
+//       Cell: ({ row: { original } }: { row: { original: Markup } }) => (
+//         editingRowId === original.id ? (
+//           <input
+//             type="number"
+//             value={updatedPercentage ?? ""}
+//             onChange={(e) => setUpdatedPercentage(Number(e.target.value))}
+//             className="border border-gray-300 rounded px-2 py-1"
+//           />
+//         ) : (
+//           <span>{original.fee_percentage}%</span>
+//         )
+//       ),
+//     },
+//     {
+//       header: "Actions",
+//       accessor: "actions",
+//       Cell: ({ row: { original } }: { row: { original: Markup } }) => (
+//         <div className="flex gap-2">
+//           {editingRowId === original.id ? (
+//             <>
+//               <button
+//                 onClick={() => handleSave(original.id)}
+//                 className="bg-green-500 text-white px-3 py-1 rounded"
+//               >
+//                 Save
+//               </button>
+//               <button
+//                 onClick={handleCancel}
+//                 className="bg-gray-500 text-white px-3 py-1 rounded"
+//               >
+//                 Cancel
+//               </button>
+//             </>
+//           ) : (
+//             <>
+//               <button
+//                 onClick={() => handleEdit(original.id, original.fee_percentage)}
+//                 className="bg-blue-500 text-white px-3 py-1 rounded"
+//               >
+//                 Edit
+//               </button>
+//               <button
+//                 onClick={() => handleDelete(original.id)}
+//                 className="bg-red-500 text-white px-3 py-1 rounded"
+//               >
+//                 Delete
+//               </button>
+//             </>
+//           )}
+//         </div>
+//       ),
+//     },
 //   ];
 
 //   return (
@@ -385,42 +712,224 @@
 //         <Button
 //           onClick={toggleModal}
 //           className="bg-primaryRed text-white w-52 rounded capitalize"
-//           aria-label="Create User"
+//           aria-label="View Markups"
 //         >
-//           Mark Up
+//           View Markups
 //         </Button>
 
-//         {/* Modal for Create and Edit User */}
-//         <Modal
-//           isOpen={modalOpen}
-//           onClose={toggleModal}
-//         >
+//         <Modal isOpen={modalOpen} onClose={toggleModal}>
 //           <div className="flex flex-col lg:p-10 md:p-8 sm:p-6 p-4">
-//           <h2 className="text-lg font-semibold mb-4">Enter The MarkUp Percentage</h2>
-//           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-//             <input
-//               type="text"
-//               value={markupPercentage}
-//               onChange={(e) => setMarkupPercentage(e.target.value)}
-//               placeholder="Enter Markup Percentage"
-//               className="border border-gray-300 w-full sm:w-[500px] rounded-md p-2 focus:outline-none focus:border-primaryRed"
+//             <h2 className="text-lg font-semibold mb-4">Markup Details</h2>
+//             <CustomTable
+//               data={markups}
+//               columns={columns}
+//               isLoading={loading}
+//               totalPages={1}
+//               currentPage={1}
+//               onPageChange={() => {}}
 //             />
-//             {error && <p className="text-red-500 text-sm">{error}</p>} 
-//             <Button type="submit" className="bg-primaryRed text-white" disabled={loading}>
-//               {loading ? "Submitting..." : "Submit"}
-//             </Button>
-//           </form>
-//         </div>
+//           </div>
 //         </Modal>
 //       </div>
-//       <div className="mt-7">
+//     </div>
+//   );
+// };
+
+// export default FlightData;
+
+
+
+
+
+
+// import { useEffect, useState } from "react";
+// import axios, { AxiosError } from "axios";
+// import { toast } from "react-toastify";
+// import Modal from "@/components/components/modal/Modal";
+// import { Button } from "@/components/ui/button";
+// import CustomTable from "@/components/components/table/CustomTable";
+
+// interface Markup {
+//   id: number;
+//   fee_name: string;
+//   fee_percentage: number;
+// }
+
+// interface Flight {
+//   id: number;
+//   reference: string;
+//   associated_records?: {
+//     pnr: string;
+//     id: string;
+//   }[];
+//   Itinerary?: {
+//     segments: {
+//       departure: {
+//         at: string;
+//       };
+//     }[];
+//   }[];
+//   airline: string;
+//   status: string;
+// }
+
+// interface ErrorResponseData {
+//   message?: string;
+// }
+
+// const FlightData: React.FC = () => {
+//   const [markups, setMarkups] = useState<Markup[]>([]);
+//   const [flights, setFlights] = useState<Flight[]>([]);
+//   const [loadingMarkups, setLoadingMarkups] = useState(false);
+//   const [loadingFlights, setLoadingFlights] = useState(false);
+//   const [modalOpen, setModalOpen] = useState(false);
+//   const [addModalOpen, setAddModalOpen] = useState(false);
+//   const [newMarkup, setNewMarkup] = useState({ fee_name: "", fee_percentage: 0 });
+
+//   const toggleModal = () => setModalOpen(!modalOpen);
+//   const toggleAddModal = () => setAddModalOpen(!addModalOpen);
+
+//   const getToken = (): string | null => {
+//     return localStorage.getItem("userToken");
+//   };
+
+//   const fetchMarkups = async () => {
+//     const token = getToken();
+//     if (!token) {
+//       toast.error("User token is missing. Please log in.");
+//       return;
+//     }
+
+//     setLoadingMarkups(true);
+
+//     try {
+//       const response = await axios.get("https://test.ffsdtravels.com/api/markup/home", {
+//         headers: {
+//           Authorization: `Bearer ${token}`,
+//           Accept: "application/json",
+//         },
+//       });
+
+//       const markupsData = response.data?.data || [];
+//       setMarkups(markupsData);
+//     } catch (error) {
+//       const err = error as AxiosError<ErrorResponseData>;
+//       toast.error(err.response?.data?.message || "Failed to fetch markups.");
+//     } finally {
+//       setLoadingMarkups(false);
+//     }
+//   };
+
+//   const fetchFlights = async () => {
+//     const token = getToken();
+//     if (!token) {
+//       toast.error("User token is missing. Please log in.");
+//       return;
+//     }
+
+//     setLoadingFlights(true);
+
+//     try {
+//       const response = await axios.get("https://test.ffsdtravels.com/api/get/flights/booked", {
+//         headers: {
+//           Authorization: `Bearer ${token}`,
+//           Accept: "application/json",
+//         },
+//       });
+
+//       const flightsData = response.data?.data || [];
+//       setFlights(flightsData);
+//     } catch (error) {
+//       const err = error as AxiosError<ErrorResponseData>;
+//       toast.error(err.response?.data?.message || "Failed to fetch flights.");
+//     } finally {
+//       setLoadingFlights(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchMarkups();
+//     fetchFlights();
+//   }, []);
+
+//   const markupColumns = [
+//     { header: "ID", accessor: "id" },
+//     { header: "Fee Name", accessor: "fee_name" },
+//     { header: "Fee Percentage", accessor: "fee_percentage" },
+//   ];
+
+//   const flightColumns = [
+//     { header: "Reference", accessor: "reference" },
+//     {
+//       header: "PNR",
+//       accessor: "associated_records",
+//       Cell: ({ row }: { row: { original: Flight } }) => {
+//         const associatedRecords = row.original.associated_records;
+//         return associatedRecords && associatedRecords[0]?.pnr
+//           ? associatedRecords[0].pnr
+//           : "N/A";
+//       },
+//     },
+//     {
+//       header: "Departure Time",
+//       accessor: "Itinerary",
+//       Cell: ({ row }: { row: { original: Flight } }) => {
+//         const itinerary = row.original.Itinerary;
+//         return itinerary && itinerary[0]?.segments[0]?.departure.at
+//           ? new Date(itinerary[0].segments[0].departure.at).toLocaleString()
+//           : "N/A";
+//       },
+//     },
+//     { header: "Airline", accessor: "airline" },
+//     { header: "Status", accessor: "status" },
+//   ];
+
+//   return (
+//     <div className="flex flex-col">
+//       {/* Markups Section */}
+//       <div className="flex gap-4 mt-5">
+//         <Button
+//           onClick={toggleModal}
+//           className="bg-primaryRed text-white w-52 rounded capitalize"
+//           aria-label="View Markups"
+//         >
+//           View Markups
+//         </Button>
+
+//         <Modal isOpen={modalOpen} onClose={toggleModal}>
+//           <div className="flex flex-col lg:p-10 md:p-8 sm:p-6 p-4">
+//             <h2 className="text-lg font-semibold mb-4">Markup Details</h2>
+//             <CustomTable
+//               data={markups}
+//               columns={markupColumns}
+//               isLoading={loadingMarkups}
+//               totalPages={1}
+//               currentPage={1}
+//               onPageChange={() => {}}
+//             />
+//             <div className="mt-4">
+//               <Button
+//                 onClick={toggleAddModal}
+//                 className="bg-green-600 text-white w-36 rounded capitalize"
+//                 aria-label="Add Markup"
+//               >
+//                 Add Markup
+//               </Button>
+//             </div>
+//           </div>
+//         </Modal>
+//       </div>
+
+//       {/* Flights Section */}
+//       <div className="mt-10">
+//         <h2 className="text-lg font-semibold mb-4">Booked Flights</h2>
 //         <CustomTable
 //           data={flights}
-//           columns={columns}
-//           isLoading={isLoading}
-//           totalPages={1} // Adjust for pagination if necessary
-//           currentPage={1} // Adjust for pagination if necessary
-//           onPageChange={() => {}} // Adjust for pagination functionality
+//           columns={flightColumns}
+//           isLoading={loadingFlights}
+//           totalPages={1}
+//           currentPage={1}
+//           onPageChange={() => {}}
 //         />
 //       </div>
 //     </div>
@@ -435,30 +944,47 @@
 
 
 
+
+
+
 import { useEffect, useState } from "react";
 import axios, { AxiosError } from "axios";
 import { toast } from "react-toastify";
-import Modal from "@/components/components/modal/Modal";
-import { Button } from "@/components/ui/button";
+// import Modal from "@/components/components/modal/Modal";
+// import { Button } from "@/components/ui/button";
 import CustomTable from "@/components/components/table/CustomTable";
 
-interface FlightDetails {
+// interface Markup {
+//   id: number;
+//   fee_name: string;
+//   fee_percentage: number;
+// }
+
+interface Flight {
+  id: number;
   reference: string;
   flightNumber: string;
-  departure: string;
+  associated_records?: {
+    pnr: string;
+    id: string;
+  };
+  Itinerary?: [
+    {
+      id: any;
+      segments: [
+        {
+          departure: {
+            at: any;
+          };
+        }
+      ];
+    }
+  ];
   arrival: string;
   departureTime: string;
   arrivalTime: string;
   airline: string;
   status: string;
-  order_id: string;
-  itinerary: {
-    order_id: string;
-  }
-  associated_records?: {
-    pnr: string;
-    id: string;
-  }
 }
 
 interface ErrorResponseData {
@@ -466,170 +992,145 @@ interface ErrorResponseData {
 }
 
 const FlightData: React.FC = () => {
-  const [flights, setFlights] = useState<FlightDetails[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [markupPercentage, setMarkupPercentage] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  // const [markups, setMarkups] = useState<Markup[]>([]);
+  const [flights, setFlights] = useState<Flight[]>([]);
+  // const [loadingMarkups, setLoadingMarkups] = useState(false);
+  const [loadingFlights, setLoadingFlights] = useState(false);
+  // const [modalOpen, setModalOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
-  const toggleModal = () => setModalOpen(!modalOpen);
-
-  const validatePercentage = (value: string): boolean => {
-    const number = parseFloat(value);
-    return !isNaN(number) && number >= 0 && number <= 100;
-  };
+  // const toggleModal = () => setModalOpen(!modalOpen);
 
   const getToken = (): string | null => {
     return localStorage.getItem("userToken");
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // const fetchMarkups = async () => {
+  //   const token = getToken();
+  //   if (!token) {
+  //     toast.error("User token is missing. Please log in.");
+  //     return;
+  //   }
 
-    if (!validatePercentage(markupPercentage)) {
-      setError("Please enter a valid markup percentage between 0 and 100.");
-      return;
-    }
+  //   // setLoadingMarkups(true);
 
+  //   try {
+  //     const response = await axios.get("https://test.ffsdtravels.com/api/markup/home", {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //         Accept: "application/json",
+  //       },
+  //     });
+
+  //     const markupsData = response.data?.data || [];
+  //     setMarkups(markupsData);
+  //   } catch (error) {
+  //     const err = error as AxiosError<ErrorResponseData>;
+  //     toast.error(err.response?.data?.message || "Failed to fetch markups.");
+  //   } finally {
+  //     setLoadingMarkups(false);
+  //   }
+  // };
+
+  const fetchFlights = async () => {
     const token = getToken();
     if (!token) {
       toast.error("User token is missing. Please log in.");
       return;
     }
-    // console.log('token', token)
 
-    setLoading(true);
-    setError("");
+    setLoadingFlights(true);
+
     try {
-      const markUpUrl = "https://test.ffsdtravels.com/api/markup/create";
-      const payload = {
-        fee_name: "markup",
-        // fee_percentage: markupPercentage,
-        fee_percentage: parseFloat(markupPercentage),
-      };
-
-      const response = await fetch(markUpUrl, {
-        method: "POST",
+      const response = await axios.get("https://test.ffsdtravels.com/api/get/flights/booked", {
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
+          Accept: "application/json",
         },
-        body: JSON.stringify(payload),
       });
 
-      if (response.ok) {
-        // const data = await response.json();
-        // console.log(data)
-        toast.success("Markup applied successfully!");
-        setModalOpen(false);
-        toast("Applied Markup");
-        setMarkupPercentage(markupPercentage);
-      } else {
-        throw new Error("Failed to apply markup");
-      }
+      const flightsData = response.data?.data || [];
+      setFlights(flightsData);
     } catch (error) {
-      toast.error("Error applying markup. Please try again later.");
-      console.error("Error applying markup:", error);
+      const err = error as AxiosError<ErrorResponseData>;
+      toast.error(err.response?.data?.message || "Failed to fetch flights.");
     } finally {
-      setLoading(false);
+      setLoadingFlights(false);
     }
   };
 
   useEffect(() => {
-    const token = getToken();
-
-    if (!token) {
-      toast.error("User token is missing. Please log in.");
-      return;
-    }
-
-    const fetchBookedFlights = async () => {
-      try {
-        const responses = await axios.get(
-          "https://test.ffsdtravels.com/api/get/flights/booked",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              Accept: "application/json",
-            },
-          }
-        );
-
-        // console.log(responses.data.data)
-
-        const flightsData = responses?.data?.data;
-
-        console.log('flightsData',flightsData);
-
-        const formattedFlights = flightsData.map((flight: FlightDetails) => ({
-          reference: flight.reference,
-          pnr: flight.associated_records[0].pnr,
-        }));
-
-
-        // console.log('formattedFlights', formattedFlights)
-
-        setFlights(formattedFlights);
-      } catch (error) {
-        const err = error as AxiosError<ErrorResponseData>;
-        toast.error(err.response?.data?.message || "An unexpected error occurred.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchBookedFlights();
+    // fetchMarkups();
+    fetchFlights();
   }, []);
 
-  const columns = [
-    { header: "Reference Number", accessor: "reference" },
-    { header: "PNR NUMBER", accessor: "pnr" },
-    // { header: "PNR NUMBER", accessor: "departure" },
-    // { header: "Departure Time", accessor: "id" },
-    // { header: "Arrival Time", accessor: "arrivalTime" },
-    // { header: "Airline", accessor: "airline" },
-    // { header: "Status", accessor: "status" },
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const paginatedFlights = flights.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const totalPages = Math.ceil(flights.length / itemsPerPage);
+
+  // const markupColumns = [
+  //   { header: "ID", accessor: "id" },
+  //   { header: "Fee Name", accessor: "fee_name" },
+  //   { header: "Fee Percentage", accessor: "fee_percentage" },
+  // ];
+
+  const flightColumns = [
+    { header: "Reference", accessor: "reference" },
+    {
+      header: "PNR",
+      accessor: "associated_records",
+      Cell: ({ row }: { row: { original: Flight } }) => {
+        const associatedRecords = row.original.associated_records;
+        return associatedRecords && associatedRecords[0]?.pnr
+          ? associatedRecords[0].pnr
+          : "N/A";
+      },
+    },
   ];
 
   return (
     <div className="flex flex-col">
-      <div className="flex gap-4 mt-5">
+      {/* <div className="flex gap-4 mt-5">
         <Button
           onClick={toggleModal}
           className="bg-primaryRed text-white w-52 rounded capitalize"
-          aria-label="Mark Up"
+          aria-label="View Markups"
         >
-          Mark Up
+          View Markups
         </Button>
 
         <Modal isOpen={modalOpen} onClose={toggleModal}>
           <div className="flex flex-col lg:p-10 md:p-8 sm:p-6 p-4">
-            <h2 className="text-lg font-semibold mb-4">Enter The MarkUp Percentage</h2>
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-              <input
-                type="number"
-                value={markupPercentage}
-                onChange={(e) => setMarkupPercentage(e.target.value)}
-                placeholder="Enter Markup Percentage"
-                className="border border-gray-300 w-full sm:w-[500px] rounded-md p-2 focus:outline-none focus:border-primaryRed"
-              />
-              {error && <p className="text-red-500 text-sm">{error}</p>}
-              <Button type="submit" className="bg-primaryRed text-white" disabled={loading}>
-                {loading ? "Submitting..." : "Submit"}
-              </Button>
-            </form>
+            <h2 className="text-lg font-semibold mb-4">Markup Details</h2>
+            <CustomTable
+              data={markups}
+              columns={markupColumns}
+              isLoading={loadingMarkups}
+              totalPages={1}
+              currentPage={1}
+              onPageChange={() => {}}
+            />
           </div>
         </Modal>
-      </div>
-      <div className="mt-7">
+      </div> */}
+
+      <div className="mt-10">
+        <h2 className="text-lg font-semibold mb-4">Booked Flights</h2>
         <CustomTable
-          data={flights}
-          columns={columns}
-          isLoading={isLoading}
-          totalPages={1}
-          currentPage={1}
-          onPageChange={() => {}}
+          data={paginatedFlights}
+          columns={flightColumns}
+          isLoading={loadingFlights}
+          totalPages={totalPages}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
         />
       </div>
     </div>
@@ -637,9 +1138,6 @@ const FlightData: React.FC = () => {
 };
 
 export default FlightData;
-
-
-
 
 
 

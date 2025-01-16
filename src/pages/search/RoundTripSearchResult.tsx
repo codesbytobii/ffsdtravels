@@ -57,12 +57,12 @@ interface Itinerary {
 }
 
 interface Price {
-  // ffsd_total: string;
+  ffsd_total: string;
   base: string;
   currency: string;
   fees: { amount: string }[];
   grandTotal: string;
-  total: string;
+  // total: string;
 }
 
 interface Flight {
@@ -179,9 +179,9 @@ const [isLoading, setIsLoading] = useState(false);
       );
   
         const data = await response.json();
-        console.log('pricedata', data);
-        console.log('bookingRequirements', data.data.bookingRequirements);
-        console.log('emailAddressRequired', data.data.bookingRequirements.travelerRequirements);
+        // console.log('pricedata', data);
+        // console.log('bookingRequirements', data.data.bookingRequirements);
+        // console.log('emailAddressRequired', data.data.bookingRequirements.travelerRequirements);
       
         if (response.ok) {
           const { bookingRequirements, accessToken } = data.data;
@@ -253,7 +253,7 @@ const [isLoading, setIsLoading] = useState(false);
                   Full pay
                 </p>
                 <p className="lg:text-sm text-[12px] sm:tracking-tight sm:leading-4 font-semibold text-gray-600">
-                  {formatPrice(result.price.currency, result.price.total)}
+                  {formatPrice(result.price.currency, result.price.ffsd_total)}
                 </p>
               </div>
             </div>

@@ -58,6 +58,12 @@ const AdminSidebar: React.FC = () => {
       activeIcon: <FlightDataIcon size="40" />,
       tooltip: "FlightData",
     },
+    {
+      url: "/admin/Markup",
+      icon: <FlightDataIcon useGrayScale={true} size="40" />,
+      activeIcon: <FlightDataIcon size="40" />,
+      tooltip: "Markup",
+    },
   ];
 
   const bottomMenuItems: MenuItem[] = [

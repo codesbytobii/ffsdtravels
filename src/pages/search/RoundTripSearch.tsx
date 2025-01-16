@@ -57,7 +57,7 @@ interface Price {
   currency: string;
   fees: { amount: string }[];
   grandTotal: string;
-  total: string;
+  ffsd_total: string;
 }
 
 interface Flight {

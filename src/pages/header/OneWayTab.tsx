@@ -208,7 +208,7 @@ const OneWayTab = () => {
     // Format departure date to 'YYYY-MM-DD'
     const formattedDepartureDate = departureDate.toLocaleDateString('en-CA');
     // const formattedDepartureDate = format(departureDate, "yyyy-MM-dd");
-    console.log('formattedDepartureDate', formattedDepartureDate)
+    // console.log('formattedDepartureDate', formattedDepartureDate)
     
     // ...existing payload logic...
     const payload = {
@@ -281,7 +281,7 @@ const OneWayTab = () => {
 
       localStorage.setItem("confirmPriceToken", data.accessToken);
 
-      console.log('the data is', data.accessToken)
+      // console.log('the data is', data.accessToken)
 
       console.log("data isdjsd", data.data);
 

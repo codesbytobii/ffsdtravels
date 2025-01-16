@@ -189,9 +189,9 @@ const FlightCard: React.FC<FlightCardProps> = ({
       );
   
         const data = await response.json();
-        console.log('pricedata', data);
-        console.log('bookingRequirements', data.data.bookingRequirements);
-        console.log('emailAddressRequired', data.data.bookingRequirements.travelerRequirements);
+        // console.log('pricedata', data);
+        // console.log('bookingRequirements', data.data.bookingRequirements);
+        // console.log('emailAddressRequired', data.data.bookingRequirements.travelerRequirements);
       
         if (response.ok) {
           const { bookingRequirements, accessToken } = data.data;

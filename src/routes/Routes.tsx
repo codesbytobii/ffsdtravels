@@ -1,4 +1,5 @@
 import FlightData from "@/pages/admin/FlightData";
+import Markup from "@/pages/admin/Markup";
 import PssLanding from "@/pages/PssLanding";
 import BookFlightPage from "@/pages/search/bookflight";
 import BookFlightPage2 from "@/pages/search/bookflight2";
@@ -99,6 +100,11 @@ const routes = {
     element: <FlightData />,
     pageName: "Flight Data",
   },
+  markUp: {
+    link: "/admin/Markup",
+    element: <Markup />,
+    pageName: "Markup",
+  },
   profile: {
     link: "/admin/profile",
     element: <ProfilePage />,
@@ -136,6 +142,7 @@ export const PUBLIC_ROUTES = [
 export const PRIVATE_ROUTES = [
   routes.wallet,
   routes.flightData,
+  routes.markUp,
   routes.profile,
   routes.dashboard,
   routes.manageUser,

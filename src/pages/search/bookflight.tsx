@@ -1446,8 +1446,8 @@ const BookFlightPage: React.FC = () => {
       
       await toast('Transaction successful! Reference: ' + response.reference);
       
-      handleBooking()
-        // setIsPaymentModalVisible(true);
+      await handleBooking()
+        setIsPaymentModalVisible(true);
         // Implement server-side to validate payment status
     }
 
@@ -1480,6 +1480,7 @@ const BookFlightPage: React.FC = () => {
 
   const handlePaymentSuccess = async (reference, amount) => {
     const apiUrl = `https://test.ffsdtravels.com/api/verify/payment`;
+    setIsPaymentModalVisible(true);
   
     try {
       const response = await fetch(`${apiUrl}?reference=${reference}&amount=${amount}`, {
@@ -2126,7 +2127,7 @@ const BookFlightPage: React.FC = () => {
             
           )}
 
-          {isPaymentModalVisible && (
+          {/* {isPaymentModalVisible && (
             <Modal isOpen={isPaymentModalVisible} onClose={() => (navigate(""))} >
 
               <div className="modal flex flex-col">
@@ -2138,7 +2139,30 @@ const BookFlightPage: React.FC = () => {
               </div>
             </Modal>
             
-          )}
+          )} */}
+
+{isPaymentModalVisible && (
+  <Modal isOpen={isPaymentModalVisible} onClose={() => navigate("")}>
+    <div className="modal flex flex-col items-center justify-center">
+      <div className="modal-content flex flex-col items-center">
+        {/* Spinner */}
+        <div className="loader border-t-4 border-primaryRed border-solid rounded-full w-12 h-12 animate-spin"></div>
+        {/* Optional text below spinner */}
+        <p className="mt-4 text-gray-500">Processing your payment...</p>
+        <button
+          onClick={() => {
+            handleBooking();
+            setIsPaymentModalVisible(false);
+          }}
+          className="bg-primaryRed text-white w-full rounded py-2 mt-6"
+        >
+          OK
+        </button>
+      </div>
+    </div>
+  </Modal>
+)}
+
         </div>
       </div>
     </>

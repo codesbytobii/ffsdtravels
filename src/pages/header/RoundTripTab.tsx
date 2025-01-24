@@ -298,6 +298,8 @@ const RoundTripTab = () => {
       }
 
       const data = await response.json();
+      
+      localStorage.setItem("confirmPriceToken", data.accessToken);
 
       console.log("data isdjsd", data);
 

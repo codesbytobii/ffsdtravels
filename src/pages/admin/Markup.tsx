@@ -200,9 +200,16 @@ const FlightData: React.FC = () => {
               <button onClick={() => handleEdit(original.id, original.fee_percentage)} className="bg-blue-500 text-white px-3 py-1 rounded">
                 Edit
               </button>
-              <button onClick={() => handleDelete(original.id)} className="bg-red-500 text-white px-3 py-1 rounded">
-                Delete
-              </button>
+              <button
+        onClick={() => {
+          if (window.confirm("Are you sure you want to delete this item?")) {
+            handleDelete(original.id);
+          }
+        }}
+        className="bg-red-500 text-white px-3 py-1 rounded"
+      >
+        Delete
+      </button>
             </>
           )}
         </div>

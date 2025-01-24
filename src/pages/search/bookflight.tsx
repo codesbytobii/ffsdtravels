@@ -1447,7 +1447,7 @@ const BookFlightPage: React.FC = () => {
       await toast('Transaction successful! Reference: ' + response.reference);
       
       await handleBooking()
-        setIsPaymentModalVisible(true);
+        setIsPaymentModalVisible(false);
         // Implement server-side to validate payment status
     }
 
@@ -1605,6 +1605,9 @@ const BookFlightPage: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (isLoading) return;
+
     setIsLoading(true);
   
     // Save the passenger information to localStorage
@@ -2076,7 +2079,7 @@ const BookFlightPage: React.FC = () => {
                       
                     </div>
                   ))}
-                  <Button type="submit" className="bg-primaryRed text-white mt-4">
+                  <Button type="submit" className="bg-primaryRed text-white mt-4" disabled={isLoading}>
                     {isLoading ? "Submitting..." : "Submit"}
                   </Button>
                 </form>
@@ -2149,7 +2152,7 @@ const BookFlightPage: React.FC = () => {
         <div className="loader border-t-4 border-primaryRed border-solid rounded-full w-12 h-12 animate-spin"></div>
         {/* Optional text below spinner */}
         <p className="mt-4 text-gray-500">Processing your payment...</p>
-        <button
+        {/* <button
           onClick={() => {
             handleBooking();
             setIsPaymentModalVisible(false);
@@ -2157,7 +2160,7 @@ const BookFlightPage: React.FC = () => {
           className="bg-primaryRed text-white w-full rounded py-2 mt-6"
         >
           OK
-        </button>
+        </button> */}
       </div>
     </div>
   </Modal>

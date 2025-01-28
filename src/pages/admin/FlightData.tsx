@@ -950,15 +950,10 @@
 import { useEffect, useState } from "react";
 import axios, { AxiosError } from "axios";
 import { toast } from "react-toastify";
-// import Modal from "@/components/components/modal/Modal";
-// import { Button } from "@/components/ui/button";
 import CustomTable from "@/components/components/table/CustomTable";
+import Modal from "@/components/components/modal/Modal";
+import { useNavigate } from "react-router-dom";
 
-// interface Markup {
-//   id: number;
-//   fee_name: string;
-//   fee_percentage: number;
-// }
 
 interface Flight {
   id: number;
@@ -984,7 +979,7 @@ interface Flight {
   departureTime: string;
   arrivalTime: string;
   airline: string;
-  status: string;
+  ticket_status: string;
 }
 
 interface ErrorResponseData {
@@ -998,6 +993,14 @@ const FlightData: React.FC = () => {
   const [loadingFlights, setLoadingFlights] = useState(false);
   // const [modalOpen, setModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
+
+
+    const navigate = useNavigate();
+
+
   const itemsPerPage = 10;
 
   // const toggleModal = () => setModalOpen(!modalOpen);
@@ -1005,33 +1008,6 @@ const FlightData: React.FC = () => {
   const getToken = (): string | null => {
     return localStorage.getItem("userToken");
   };
-
-  // const fetchMarkups = async () => {
-  //   const token = getToken();
-  //   if (!token) {
-  //     toast.error("User token is missing. Please log in.");
-  //     return;
-  //   }
-
-  //   // setLoadingMarkups(true);
-
-  //   try {
-  //     const response = await axios.get("https://test.ffsdtravels.com/api/markup/home", {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //         Accept: "application/json",
-  //       },
-  //     });
-
-  //     const markupsData = response.data?.data || [];
-  //     setMarkups(markupsData);
-  //   } catch (error) {
-  //     const err = error as AxiosError<ErrorResponseData>;
-  //     toast.error(err.response?.data?.message || "Failed to fetch markups.");
-  //   } finally {
-  //     setLoadingMarkups(false);
-  //   }
-  // };
 
   const fetchFlights = async () => {
     const token = getToken();
@@ -1051,6 +1027,7 @@ const FlightData: React.FC = () => {
       });
 
       const flightsData = response.data?.data || [];
+      console.log(flightsData)
       setFlights(flightsData);
     } catch (error) {
       const err = error as AxiosError<ErrorResponseData>;
@@ -1069,18 +1046,54 @@ const FlightData: React.FC = () => {
     setCurrentPage(page);
   };
 
+  const handleEdit = (flight: Flight) => {
+    setSelectedFlight(flight);
+    setModalOpen(true);
+  };
+
+  const [confirmLoading, setConfirmLoading] = useState(false);
+
+  const confirmIssueTicket = async () => {
+    setConfirmLoading(true);
+    if (!selectedFlight) return;
+  
+    const token = getToken();
+    if (!token) {
+      toast.error("User token is missing. Please log in.");
+      return;
+    }
+  
+    try {
+      const response = await axios.post(
+        "https://test.ffsdtravels.com/api/flight/ticket",
+        { reference: selectedFlight.reference },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+          },
+        }
+      );
+  
+      toast.success(`Ticket issued successfully for flight ${selectedFlight.reference}`);
+      console.log("Ticket issued:", response.data);
+      setModalOpen(false);
+      setSelectedFlight(null);
+    } catch (error) {
+      const err = error as AxiosError<ErrorResponseData>;
+      toast.error(err.response?.data?.message || "Failed to issue ticket.");
+      console.error("Error issuing ticket:", error);
+    }
+  };
+  
+  
+
   const paginatedFlights = flights.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
   const totalPages = Math.ceil(flights.length / itemsPerPage);
-
-  // const markupColumns = [
-  //   { header: "ID", accessor: "id" },
-  //   { header: "Fee Name", accessor: "fee_name" },
-  //   { header: "Fee Percentage", accessor: "fee_percentage" },
-  // ];
 
   const flightColumns = [
     { header: "Reference", accessor: "reference" },
@@ -1094,33 +1107,45 @@ const FlightData: React.FC = () => {
           : "N/A";
       },
     },
+    { header: "Status", accessor: "ticket_status" },
+    {
+      header: "Edit",
+      accessor: "edit",
+      Cell: ({ row }: { row: { original: Flight } }) => {
+        // Debugging to log ticket_status
+        // console.log("Ticket Status:", row.original.ticket_status);
+  
+        const isDisabled = row.original.ticket_status.toLowerCase() === "done";
+        return isDisabled ? (
+          <span className="text-gray-500">Ticketed</span>
+        ) : (
+          <button
+            onClick={() => !isDisabled && handleEdit(row.original)}
+            disabled={isDisabled}
+            style={{
+              color: isDisabled ? "gray" : "white",
+              cursor: isDisabled ? "not-allowed" : "pointer",
+              backgroundColor: isDisabled ? "#e0e0e0" : "#007bff",
+              border: "none",
+              borderRadius: "4px",
+              padding: "8px 16px",
+              fontSize: "14px",
+              fontWeight: "bold",
+              transition: "background-color 0.3s, transform 0.2s",
+              boxShadow: isDisabled ? "none" : "0px 4px 6px rgba(0, 0, 0, 0.1)",
+            }}
+            >
+              Mark As Ticketed
+            </button>
+
+        );
+      },
+    },
   ];
+  
 
   return (
     <div className="flex flex-col">
-      {/* <div className="flex gap-4 mt-5">
-        <Button
-          onClick={toggleModal}
-          className="bg-primaryRed text-white w-52 rounded capitalize"
-          aria-label="View Markups"
-        >
-          View Markups
-        </Button>
-
-        <Modal isOpen={modalOpen} onClose={toggleModal}>
-          <div className="flex flex-col lg:p-10 md:p-8 sm:p-6 p-4">
-            <h2 className="text-lg font-semibold mb-4">Markup Details</h2>
-            <CustomTable
-              data={markups}
-              columns={markupColumns}
-              isLoading={loadingMarkups}
-              totalPages={1}
-              currentPage={1}
-              onPageChange={() => {}}
-            />
-          </div>
-        </Modal>
-      </div> */}
 
       <div className="mt-10">
         <h2 className="text-lg font-semibold mb-4">Booked Flights</h2>
@@ -1133,6 +1158,26 @@ const FlightData: React.FC = () => {
           onPageChange={handlePageChange}
         />
       </div>
+
+      {modalOpen && (
+        <Modal isOpen={modalOpen} onClose={() => navigate("")}>
+            <div className="modal">
+    <div className="modal-content">
+      <p>Are you sure you want to issue a ticket for flight {selectedFlight?.reference}?</p>
+      <div className="modal-actions">
+        <button onClick={confirmIssueTicket} className="bg-primaryGreen text-white w-full rounded py-2 m-2">
+          {confirmLoading ? "Confirming" : "Confirm"}
+        </button>
+        <button onClick={() => setModalOpen(false)} className="bg-primaryRed text-white w-full rounded py-2 m-2">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+        </Modal> 
+  
+)}
+
     </div>
   );
 };

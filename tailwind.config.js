@@ -24,6 +24,7 @@ module.exports = {
       },
       colors: {
         primaryRed: "#E5302F",
+        primaryGreen: "#1fa125",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

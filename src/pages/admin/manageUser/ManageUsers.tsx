@@ -10,7 +10,7 @@ import CustomTable from "@/components/components/table/CustomTable";
 import { FaEdit } from "react-icons/fa";
 import CreateOrganizationUserForm from "./CreateOrganizationUserForm";
 
-interface User {
+export interface User {
   id: number;
   lastName: string;
   firstName: string;
